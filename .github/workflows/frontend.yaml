@@ -21,29 +21,34 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Use Node.js 18.x
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 18.x
 
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          cache: 'npm'
+          version: 8
+
+      - name: Install dependencies
+        uses: actions/cache@v3
+        with:
+          cache: 'pnpm'
           node-version: 18.x
-          cache-dependency-path: ./frontend/package-lock.json
-      - run: npm ci
-      - run: npm run build
+          cache-dependency-path: ./frontend/pnpm-lock.yaml
+      - run: pnpm install
+      - run: pnpm run build
         env:
           VITE_API_URL: https://api.rutube.banzai-team.ru
 
-      - run: zip -qq -r build.zip dist
+      # - run: zip -qq -r build.zip dist
 
-      # Share artifact inside workflow
-      - name: Share artifact inside workflow
-        uses: actions/upload-artifact@v3
-        with:
-          path: ./frontend/build.zip
-          name: build.zip
+      # # Share artifact inside workflow
+      # - name: Share artifact inside workflow
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     path: ./frontend/build.zip
+      #     name: build.zip
 
   # deploy:
   #   if: github.ref == 'refs/heads/main'
@@ -91,5 +96,5 @@ jobs:
           docker build -t $tag:${{ github.sha }} -t $tag:latest .
           docker push $tag --all-tags
         env:
-          DOCKER_REGISTRY: cr.yandex/crpq1hjt5vn1sf4s6j1b
+          DOCKER_REGISTRY: cr.yandex/crpmbkrui7s085cd545u
 

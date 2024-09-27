@@ -50,12 +50,12 @@ services:
       dockerfile: Dockerfile
     command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
     volumes:
-      - ./ml/:/app
+      - ./ml:/app
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api.${HOST}`)"
-      - "traefik.http.routers.api.entrypoints=websecure"
-      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.entrypoints=web"
+      # - "traefik.http.routers.api.tls=true"
       - "traefik.http.services.api.loadbalancer.server.port=8080"
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
