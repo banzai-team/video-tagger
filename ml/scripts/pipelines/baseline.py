@@ -9,17 +9,7 @@ from datetime import datetime
 import argparse
 from datetime import datetime
 
-
-def load_data(file_path_train, file_path_iab):
-    data = pd.read_csv(file_path_train)[["video_id", "title"]]
-    taxonomy = pd.read_csv(file_path_iab)
-
-    print(f"Data columns: {data.columns.tolist()}")
-    print(f"Data head: \n{data.head(5)}")
-
-    print(f"Taxonomy head: \n{taxonomy.head(5)}")
-    print(f"Taxonomy columns: {taxonomy.columns.tolist()}")
-    return data, taxonomy
+from ml_lib.utils import load_data
 
 
 def load_model():
@@ -65,7 +55,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     submission_file = args.submission_file
-    data, taxonomy = load_data(file_path_train=args.file_path_train, file_path_iab=args.file_path_iab)
+    data, taxonomy = load_data(file_path_train=args.file_path_train, file_path_iab=args.file_path_iab, cols=("video_id", "title"))
     model, dim = load_model()
     
     data["title_vector"] = data["title"].apply(lambda l: model.encode(l, convert_to_tensor=True).cpu().numpy())
