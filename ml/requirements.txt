@@ -23,3 +23,17 @@ bitsandbytes
 #
 watchdog==5.0.2
 psycopg2-binary==2.9.9
+
+pandas
+sentence_transformers
+tqdm
+numpy
+faiss-cpu
+tabulate
+guidance
+bitsandbytes
+transformers
+accelerate
+openai-whisper
+yt-dlp
+moviepy

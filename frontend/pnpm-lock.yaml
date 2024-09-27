@@ -47,9 +47,6 @@ importers:
       react-router-dom:
         specifier: ^6.26.2
         version: 6.26.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      root:
-        specifier: github:tanstack/react-query
-        version: git+https://git@github.com:tanstack/react-query.git#8727d978ed01bfa6c828304d2bf76e1e6683a6ca
       tailwindcss-animate:
         specifier: ^1.0.6
         version: 1.0.7(tailwindcss@3.4.13)
@@ -1595,10 +1592,6 @@ packages:
     resolution: {integrity: sha512-GVsDdsbJzzy4S/v3dqWPJ7EfvZJfCHiDqe80IyrF59LYuP+e6U1LJoUqeuqRbwAWoMNoXivMNeNAOf5E22VA1w==}
     engines: {node: '>=14.18.0', npm: '>=8.0.0'}
     hasBin: true
-
-  root@git+https://git@github.com:tanstack/react-query.git#8727d978ed01bfa6c828304d2bf76e1e6683a6ca:
-    resolution: {commit: 8727d978ed01bfa6c828304d2bf76e1e6683a6ca, repo: git@github.com:tanstack/react-query.git, type: git}
-    version: 0.0.0
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
@@ -3239,8 +3232,6 @@ snapshots:
   rollup@3.29.5:
     optionalDependencies:
       fsevents: 2.3.3
-
-  root@git+https://git@github.com:tanstack/react-query.git#8727d978ed01bfa6c828304d2bf76e1e6683a6ca: {}
 
   run-parallel@1.2.0:
     dependencies:
