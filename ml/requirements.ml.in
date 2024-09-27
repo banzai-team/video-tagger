@@ -5,6 +5,3 @@ numpy
 faiss-cpu
 tabulate
 guidance
-bitsandbytes
-transformers
-accelerate

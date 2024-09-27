@@ -4,12 +4,8 @@
 #
 #    pip-compile --output-file=requirements.ml.txt requirements.ml.in
 #
-accelerate==0.34.2
-    # via -r requirements.ml.in
 annotated-types==0.7.0
     # via pydantic
-bitsandbytes==0.42.0
-    # via -r requirements.ml.in
 certifi==2024.8.30
     # via requests
 charset-normalizer==3.3.2
@@ -31,7 +27,6 @@ guidance==0.1.16
     # via -r requirements.ml.in
 huggingface-hub==0.25.1
     # via
-    #   accelerate
     #   sentence-transformers
     #   tokenizers
     #   transformers
@@ -50,7 +45,6 @@ networkx==3.2.1
 numpy==1.26.4
     # via
     #   -r requirements.ml.in
-    #   accelerate
     #   faiss-cpu
     #   guidance
     #   pandas
@@ -61,7 +55,6 @@ ordered-set==4.1.0
     # via guidance
 packaging==24.1
     # via
-    #   accelerate
     #   faiss-cpu
     #   huggingface-hub
     #   transformers
@@ -73,8 +66,6 @@ platformdirs==4.3.6
     # via guidance
 protobuf==5.28.2
     # via guidance
-psutil==6.0.0
-    # via accelerate
 pydantic==2.9.2
     # via guidance
 pydantic-core==2.23.4
@@ -85,7 +76,6 @@ pytz==2024.2
     # via pandas
 pyyaml==6.0.2
     # via
-    #   accelerate
     #   huggingface-hub
     #   transformers
 regex==2024.9.11
@@ -99,14 +89,11 @@ requests==2.32.3
     #   tiktoken
     #   transformers
 safetensors==0.4.5
-    # via
-    #   accelerate
-    #   transformers
+    # via transformers
 scikit-learn==1.5.2
     # via sentence-transformers
 scipy==1.13.1
     # via
-    #   bitsandbytes
     #   scikit-learn
     #   sentence-transformers
 sentence-transformers==3.1.1
@@ -124,9 +111,7 @@ tiktoken==0.7.0
 tokenizers==0.20.0
     # via transformers
 torch==2.4.1
-    # via
-    #   accelerate
-    #   sentence-transformers
+    # via sentence-transformers
 tqdm==4.66.5
     # via
     #   -r requirements.ml.in
@@ -134,9 +119,7 @@ tqdm==4.66.5
     #   sentence-transformers
     #   transformers
 transformers==4.45.1
-    # via
-    #   -r requirements.ml.in
-    #   sentence-transformers
+    # via sentence-transformers
 typing-extensions==4.12.2
     # via
     #   huggingface-hub
