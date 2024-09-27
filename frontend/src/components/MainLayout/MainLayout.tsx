@@ -31,7 +31,6 @@ const MainLayout: React.FC = () => {
                 {/*bg-white*/}
                 bg-sidebar
             "
-            style={{backgroundImage: 'url(/bg.svg)'}}
         >
             <Sidebar menuItems={menuItems} />
             <div className="flex flex-col h-full w-full sm:pl-60 sm:py-4 sm:pr-4">

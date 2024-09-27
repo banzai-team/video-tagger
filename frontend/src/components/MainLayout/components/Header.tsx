@@ -38,9 +38,8 @@ const Header: React.FC<HeaderProps> = ({menuItems}) => {
                             </Link>
                         </SheetClose>
                         {menuItems.map((item, key) => (
-                            <SheetClose asChild>
+                            <SheetClose asChild key={`mobile-menu-item-${key}`}>
                                 <NavLink
-                                    key={`mobile-menu-item-${key}`}
                                     to={item.link}
                                     className="
                                             py-3 px-4 w-full text-sm
