@@ -1,6 +1,8 @@
 import time
-from celery import Celery
+from celery import Celery, chain
 from app.config import CELERY_BROKER_URL, CELERY_RESULT_BACKEND
+from app.logger import logger
+import requests
 
 celery = Celery(
     "tasks",
