@@ -80,7 +80,7 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
                               style={{backgroundImage: 'url(/round.svg)'}}
                               className="bg-center bg-no-repeat bg-cover relative p-4 flex h-14 w-32 flex-col items-center justify-center rounded-md bg-zinc-100 md:p-2 md:h-20"
                           >
-                            <Button className="absolute top-1 right-1" variant="ghost" size="xs"
+                            <Button className="absolute top-1 right-1" variant="ghost" size="lg"
                                     onClick={() => formik.setFieldValue("files", null)}>
                               <X className=" h-5 w-5 cursor-pointer hover:opacity-50"/>
                             </Button>

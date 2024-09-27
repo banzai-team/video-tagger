@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import {Link} from "react-router-dom";
 import {Routes} from "@/Router.tsx";
 import {ArrowLeft} from "lucide-react";
@@ -29,9 +29,9 @@ const VideoPage: React.FC = () => {
                     src={`https://rutube.ru/play/embed/${id}`}
                     frameBorder="0"
                     allow="clipboard-write; autoplay"
-                    webkitAllowFullScreen
-                    mozallowfullscreen
-                    allowFullScreen
+                    // webkitAllowFullScreen
+                    // mozallowfullscreen
+                    // allowFullScreen
                 />
                 <div>
                     <div className="flex gap-3 flex-wrap max-h-max">
