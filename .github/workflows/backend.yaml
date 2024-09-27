@@ -1,32 +1,32 @@
-name: Backend Python CI workflow
-on:
-  workflow_dispatch:
-  push:
-#    paths:
-#      - 'backend/**'
-#      - '.github/workflows/backend.yaml'
-    branches:
-      - main
-#  pull_request:
-#    paths:
-#      - 'backend/**'
-jobs:
-  deploy-container:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend/
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v3
-      - run: echo $YANDEX_AUTH_KEY | docker login --username json_key --password-stdin cr.yandex
-        env:
-          YANDEX_AUTH_KEY: ${{ secrets.YANDEX_AUTH_KEY }}
-      - run: |
-          echo "Packaging docker image ..."
-          tag="$DOCKER_REGISTRY/rutube-backend"
-          docker build -t $tag:${{ github.sha }} -t $tag:latest .
-          docker push $tag --all-tags
-        env:
-          DOCKER_REGISTRY: cr.yandex/crpmbkrui7s085cd545u
+# name: Backend Python CI workflow
+# on:
+#   workflow_dispatch:
+#   push:
+# #    paths:
+# #      - 'backend/**'
+# #      - '.github/workflows/backend.yaml'
+#     branches:
+#       - main
+# #  pull_request:
+# #    paths:
+# #      - 'backend/**'
+# jobs:
+#   deploy-container:
+#     if: github.ref == 'refs/heads/main'
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: ./backend/
+#     steps:
+#       - name: Clone repository
+#         uses: actions/checkout@v3
+#       - run: echo $YANDEX_AUTH_KEY | docker login --username json_key --password-stdin cr.yandex
+#         env:
+#           YANDEX_AUTH_KEY: ${{ secrets.YANDEX_AUTH_KEY }}
+#       - run: |
+#           echo "Packaging docker image ..."
+#           tag="$DOCKER_REGISTRY/rutube-backend"
+#           docker build -t $tag:${{ github.sha }} -t $tag:latest .
+#           docker push $tag --all-tags
+#         env:
+#           DOCKER_REGISTRY: cr.yandex/crpmbkrui7s085cd545u
