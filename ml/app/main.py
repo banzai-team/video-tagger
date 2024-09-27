@@ -1,8 +1,8 @@
 from fastapi import FastAPI, status
 from app.apis import v1_router
 from app.logger import logger
-# from app.database import engine
-# from app.models import video  # Import your models
+from app.db import engine
+from app.db import video  # Import your models
 
 # Create database tables
 video.Base.metadata.create_all(bind=engine)

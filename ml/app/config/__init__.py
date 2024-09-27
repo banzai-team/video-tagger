@@ -1,1 +1,1 @@
-from .config import device, MODEL_PATH
+from .config import device, MODEL_PATH, CELERY_BROKER_URL, CELERY_RESULT_BACKEND
