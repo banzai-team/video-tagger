@@ -1,3 +1,4 @@
+import time
 from celery import Celery
 from app.config import CELERY_BROKER_URL, CELERY_RESULT_BACKEND
 
@@ -18,3 +19,4 @@ def process_video(self, video_id):
         self.update_state(state='PROGRESS', meta={'progress': i})
         time.sleep(0.1)
     return {'status': 'completed'}
+

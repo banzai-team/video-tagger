@@ -9,17 +9,17 @@ uvicorn==0.23.2
 # core requirements
 torch==2.1.1
 torchaudio==2.1.1
-git+https://github.com/huggingface/transformers.git
 datasets[audio]
 numpy==1.26.0
 accelerate
 requests==2.31.0
 sentencepiece
-guidance
-transformers
 bitsandbytes
 accelerate
 pandas
 numpy
-llama-cpp-python
 bitsandbytes
+
+#
+watchdog==5.0.2
+psycopg2
