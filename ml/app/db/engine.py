@@ -16,12 +16,14 @@ except SQLAlchemyError as e:
     logger.error(f"Error creating database engine: {str(e)}")
     raise
 
+
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
 
 # Test database connection
 def test_db_connection():
@@ -31,6 +33,7 @@ def test_db_connection():
     except SQLAlchemyError as e:
         logger.error(f"Error connecting to the database: {str(e)}")
         raise
+
 
 # Call the test function
 test_db_connection()
