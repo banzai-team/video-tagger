@@ -1,0 +1,95 @@
+name: Frontend CI workflow
+on:
+  push:
+#    paths:
+#      - 'frontend/**'
+#      - '.github/workflows/frontend.yaml'
+    branches:
+      - main
+#  pull_request:
+#    paths:
+#      - 'frontend/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18.x
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          cache: 'npm'
+          node-version: 18.x
+          cache-dependency-path: ./frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_API_URL: https://api.rutube.banzai-team.ru
+
+      - run: zip -qq -r build.zip dist
+
+      # Share artifact inside workflow
+      - name: Share artifact inside workflow
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./frontend/build.zip
+          name: build.zip
+
+  # deploy:
+  #   if: github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   # When application is successfully tested and build has been generated
+  #   # Then we can start with deployment
+  #   needs: build
+  #   steps:
+  #     # Download previously shared build
+  #     - name: Get artifact
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: build.zip
+  #     - uses: montudor/action-zip@v1
+  #       with:
+  #         args: unzip -qq build.zip -d .
+  #     # Set the credentials from repository settings/secrets
+  #     - uses: jakejarvis/s3-sync-action@master
+  #       with:
+  #         args: --delete
+  #       env:
+  #         AWS_S3_ENDPOINT: https://storage.yandexcloud.net/
+  #         AWS_S3_BUCKET:
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         SOURCE_DIR: 'dist'      # optional: defaults to entire repository
+
+  build-container:
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+      - run: echo $YANDEX_AUTH_KEY | docker login --username json_key --password-stdin cr.yandex
+        env:
+          YANDEX_AUTH_KEY: ${{ secrets.YANDEX_AUTH_KEY }}
+      - run: |
+          echo "Packaging docker image ..."
+          tag="$DOCKER_REGISTRY/rutube-app"
+          docker build -t $tag:${{ github.sha }} -t $tag:latest .
+          docker push $tag --all-tags
+        env:
+          DOCKER_REGISTRY: cr.yandex/crpq1hjt5vn1sf4s6j1b
+

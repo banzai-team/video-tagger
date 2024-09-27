@@ -1,0 +1,16 @@
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+  location / {
+        root   /usr/share/nginx/html;
+        try_files $uri $uri/ /index.html;
+
+        sub_filter </head>
+                 '<script data-script="config-overwrites">
+                 window.API_URL = "$API_URL";
+                 </script></head>';
+         sub_filter_once on;
+    }
+}

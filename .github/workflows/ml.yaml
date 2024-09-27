@@ -1,0 +1,32 @@
+name: ML Python CI workflow
+on:
+  workflow_dispatch:
+  push:
+   paths:
+     - 'ml/**'
+     - '.github/workflows/ml.yaml'
+   branches:
+      - main
+#  pull_request:
+#    paths:
+#      - 'ml/**'
+jobs:
+  deploy-container:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ml/
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+      - run: echo $YANDEX_AUTH_KEY | docker login --username json_key --password-stdin cr.yandex
+        env:
+          YANDEX_AUTH_KEY: ${{ secrets.YANDEX_AUTH_KEY }}
+      - run: |
+          echo "Packaging docker image ..."
+          tag="$DOCKER_REGISTRY/rutube-ml"
+          docker build -t $tag:${{ github.sha }} -t $tag:latest .
+          docker push $tag --all-tags
+        env:
+          DOCKER_REGISTRY: cr.yandex/crpq1hjt5vn1sf4s6j1b
