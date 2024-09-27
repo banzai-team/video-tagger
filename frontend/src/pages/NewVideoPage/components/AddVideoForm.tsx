@@ -1,4 +1,3 @@
-import React from 'react';
 import { useFormik } from 'formik';
 // import { CardContent, CardFooter } from '~/components/ui/card';
 // import { Input } from '~/components/ui/input';
@@ -12,7 +11,7 @@ import {Input} from "@/components/ui/input.tsx";
 // import {Spinner} from "~/components/ui/spinner";
 
 type AddVacancyFormProps = {
-  onSubmit: (values: { link?: string; files?: any, title?: string; description?: string; }) => Promise<any>;
+  onSubmit?: (values: { link?: string; files?: any, title?: string; description?: string; }) => Promise<any>;
 };
 
 const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
@@ -37,7 +36,7 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
     },
     onSubmit: async (values, {setSubmitting}) => {
       setSubmitting(true);
-      await onSubmit(values);
+      if (onSubmit) await onSubmit(values);
       setSubmitting(false);
     },
     // validationSchema,

@@ -5,7 +5,6 @@ import NewVideoPage from "@/pages/NewVideoPage";
 import MainPage from "@/pages/MainPage";
 import {ArrowLeft} from "lucide-react";
 import EmptyView from "@/components/EmptyView";
-import React from "react";
 
 export const Routes = {
     Root: '/',
