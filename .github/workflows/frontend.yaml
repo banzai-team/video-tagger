@@ -36,6 +36,7 @@ jobs:
           cache: 'pnpm'
           node-version: 18.x
           cache-dependency-path: ./frontend/pnpm-lock.yaml
+      - run: pnpm install
       - run: pnpm run build
         env:
           VITE_API_URL: https://api.rutube.banzai-team.ru

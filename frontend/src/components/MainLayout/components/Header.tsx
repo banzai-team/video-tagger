@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { BookOpenCheck, ChevronLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import {Button} from "@/components/ui/button.tsx";
 import {Sheet, SheetClose, SheetContent, SheetTrigger} from "@/components/ui/sheet.tsx";
 import {MenuItemsType} from "@/components/MainLayout/MainLayout.tsx";

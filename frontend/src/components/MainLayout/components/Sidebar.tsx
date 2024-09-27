@@ -1,5 +1,5 @@
 import React from "react";
-import {Home, LineChart, BookMarked, BookOpenCheck, Settings, ShoppingCart, Users2} from "lucide-react";
+// import {Home, LineChart, BookMarked, BookOpenCheck, Settings, ShoppingCart, Users2} from "lucide-react";
 // import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "~/components/ui/tooltip";
 import {NavLink, Link} from "react-router-dom";
 import {MenuItemsType} from "@/components/MainLayout/MainLayout.tsx";
