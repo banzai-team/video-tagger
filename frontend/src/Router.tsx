@@ -5,6 +5,7 @@ import NewVideoPage from "@/pages/NewVideoPage";
 import MainPage from "@/pages/MainPage";
 import {ArrowLeft} from "lucide-react";
 import EmptyView from "@/components/EmptyView";
+import VideoPage from "@/pages/VideoPage";
 
 export const Routes = {
     Root: '/',
@@ -28,7 +29,7 @@ const InnerRouter = () => {
                 },
                 {
                     path: `${Routes.Video}/:id`,
-                    element: <h2>Video # ????</h2>,
+                    element: <VideoPage/>,
                 },
                 {
                     path: "*",

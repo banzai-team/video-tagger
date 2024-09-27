@@ -32,14 +32,14 @@ const MainPage: React.FC = () => {
             <h2 className="mb-5">Ваши видео</h2>
             {
                 !data || !data.length
-                ? (<EmptyView title="Список видео пуст">
+                    ? (<EmptyView title="Список видео пуст">
                         <Button
                             className="flex gap-2"
                             onClick={() => navigate(Routes.New)}
                         >
                             <Plus className=""/>Добавить видео</Button>
                     </EmptyView>)
-                : <VideoTable data={data}/>
+                    : <VideoTable data={data}/>
             }
         </>
     );
