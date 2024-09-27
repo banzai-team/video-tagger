@@ -1,0 +1,196 @@
+---
+openapi: 3.1.0
+info:
+  title: ml service
+  description: Fastapi service for gk
+  version: '0.1'
+paths:
+  "/v1/process_video_url":
+    post:
+      tags:
+      - Inference endpoints
+      summary: Process Video Url
+      description: Обрабатывает видео по URL
+      operationId: process_video_url_v1_process_video_url_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/VideoUrlInput"
+        required: true
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TaskOutput"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/v1/process_video_file":
+    post:
+      tags:
+      - Inference endpoints
+      summary: Process Video File
+      description: Обрабатывает загруженное видео
+      operationId: process_video_file_v1_process_video_file_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              "$ref": "#/components/schemas/Body_process_video_file_v1_process_video_file_post"
+        required: true
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TaskOutput"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/v1/list_videos":
+    get:
+      tags:
+      - Video Management
+      summary: List Videos
+      description: Получить список всех видео
+      operationId: list_videos_v1_list_videos_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  "$ref": "#/components/schemas/VideoInfo"
+                type: array
+                title: Response List Videos V1 List Videos Get
+  "/health":
+    get:
+      tags:
+      - System probs
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: integer
+                title: Response Health Health Get
+components:
+  schemas:
+    Body_process_video_file_v1_process_video_file_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+        description:
+          type: string
+          title: Description
+        title:
+          type: string
+          title: Title
+      type: object
+      required:
+      - file
+      - description
+      - title
+      title: Body_process_video_file_v1_process_video_file_post
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            "$ref": "#/components/schemas/ValidationError"
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    TaskOutput:
+      properties:
+        task_id:
+          type: string
+          title: Task Id
+      type: object
+      required:
+      - task_id
+      title: TaskOutput
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    VideoInfo:
+      properties:
+        id:
+          type: integer
+          title: Id
+        file_path:
+          type: string
+          title: File Path
+        status:
+          type: string
+          title: Status
+        progress:
+          type: number
+          title: Progress
+        result:
+          type: string
+          title: Result
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - id
+      - file_path
+      - status
+      - progress
+      - result
+      - created_at
+      - updated_at
+      title: VideoInfo
+    VideoUrlInput:
+      properties:
+        video_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Video Url
+      type: object
+      required:
+      - video_url
+      title: VideoUrlInput
