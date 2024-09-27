@@ -1,7 +1,11 @@
 // import React from "react";
-import {BrowserRouter, RouteObject, useRoutes} from "react-router-dom";
+import {BrowserRouter, Link, RouteObject, useRoutes} from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
 import NewVideoPage from "@/pages/NewVideoPage";
+import MainPage from "@/pages/MainPage";
+import {ArrowLeft} from "lucide-react";
+import EmptyView from "@/components/EmptyView";
+import React from "react";
 
 export const Routes = {
     Root: '/',
@@ -17,7 +21,7 @@ const InnerRouter = () => {
             children: [
                 {
                     index: true,
-                    element: <h2>Ваши видео</h2>,
+                    element: <MainPage/>,
                 },
                 {
                     path: Routes.New,
@@ -25,11 +29,20 @@ const InnerRouter = () => {
                 },
                 {
                     path: `${Routes.Video}/:id`,
-                    element: <h2>Выбранное видео</h2>,
+                    element: <h2>Video # ????</h2>,
                 },
                 {
                     path: "*",
-                    element: <h2>404</h2>,
+                    element: (
+                        <EmptyView title="404" description="такой страницы не существует">
+                            <Link
+                                className="flex gap-2 items-center hover:opacity-80 "
+                                to={Routes.Root}
+                            >
+                                <ArrowLeft className="h-5 w-5"/>вернуться на главную</Link>
+                        </EmptyView>
+                    ),
+
                 },
             ],
         },
