@@ -44,6 +44,16 @@ services:
       - ${ROOT_DIR}.app_cache/db:/var/lib/postgresql/data
     restart: always
 
+  migrate:
+    build: 
+      context: ./ml
+      dockerfile: Dockerfile
+    command: alembic upgrade head
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+    depends_on:
+      - db  # Ждет, пока контейнер базы данных будет готов
+
   api:
     build: 
       context: ./ml
@@ -64,6 +74,7 @@ services:
     depends_on:
       - db
       - rabbitmq
+      - migrate
 
   celery_worker:
     restart: always
@@ -76,6 +87,7 @@ services:
     depends_on:
       - rabbitmq
       - db
+      - migrate
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
