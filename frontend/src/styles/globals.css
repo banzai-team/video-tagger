@@ -80,4 +80,8 @@
     @apply font-bold;
     @apply text-2xl sm:text-3xl;
   }
+
+  h4 {
+    @apply text-xs text-gray-500;
+  }
 }

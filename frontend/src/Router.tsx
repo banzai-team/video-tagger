@@ -1,6 +1,7 @@
 // import React from "react";
 import {BrowserRouter, RouteObject, useRoutes} from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
+import NewVideoPage from "@/pages/NewVideoPage";
 
 export const Routes = {
     Root: '/',
@@ -20,7 +21,7 @@ const InnerRouter = () => {
                 },
                 {
                     path: Routes.New,
-                    element: <h2>Добавить видео</h2>,
+                    element: <NewVideoPage/>,
                 },
                 {
                     path: `${Routes.Video}/:id`,

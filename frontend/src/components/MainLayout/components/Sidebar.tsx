@@ -11,7 +11,7 @@ type SidebarProps = {
 const Sidebar: React.FC<SidebarProps> = ({menuItems}) => {
     return (
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-56 flex-col bg-sidebar sm:flex">
-            <nav className="flex flex-col items-start gap-2 px-2 sm:py-8">
+            <nav className="flex flex-col items-start gap-2 px-2 sm:py-10">
                 <Link
                     to="/"
                     className="

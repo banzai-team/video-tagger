@@ -39,7 +39,8 @@ const MainLayout: React.FC = () => {
                 <main
                     className="flex-1 items-start
                         bg-white  h-full w-full
-                        p-4 sm:px-10 sm:py-4
+                        overflow-auto
+                        p-4 sm:px-10 sm:py-6
                         sm:rounded-3xl
                         "
                 >
