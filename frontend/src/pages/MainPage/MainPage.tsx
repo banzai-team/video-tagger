@@ -1,4 +1,3 @@
-import React from 'react';
 import EmptyView from "@/components/EmptyView";
 import {Button} from "@/components/ui/button.tsx";
 import {Plus} from "lucide-react";
@@ -19,7 +18,7 @@ const MainPage: React.FC = () => {
     const data: VideoDataItem[] = [{
         id: '0',
         name: "test",
-        tags: ["test1", "test 2"],
+        tags: ["test1", "test 2", "test 3", "test 4"],
         source: 'https://rutube.ru/video/c6cc4d620b1d4338901770a44b3e82f4/'
     },{
         id: '1',
