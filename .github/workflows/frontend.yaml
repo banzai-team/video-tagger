@@ -91,5 +91,5 @@ jobs:
           docker build -t $tag:${{ github.sha }} -t $tag:latest .
           docker push $tag --all-tags
         env:
-          DOCKER_REGISTRY: cr.yandex/crpq1hjt5vn1sf4s6j1b
+          DOCKER_REGISTRY: cr.yandex/crpmbkrui7s085cd545u
 
