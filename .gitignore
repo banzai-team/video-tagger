@@ -1,4 +1,5 @@
 .env
 .history
 .app_cache/
+data/
 .idea
