@@ -27,13 +27,22 @@ const menuItems = [
 const MainLayout: React.FC = () => {
     return (
         <div
-            className="flex min-h-screen w-full flex-col bg-white bg-center bg-no-repeat bg-cover"
+            className="flex min-h-screen h-screen w-full flex-col bg-center bg-no-repeat bg-cover
+                {/*bg-white*/}
+                bg-sidebar
+            "
             style={{backgroundImage: 'url(/bg.svg)'}}
         >
             <Sidebar menuItems={menuItems} />
-            <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-52">
+            <div className="flex flex-col h-full w-full sm:pl-60 sm:py-4 sm:pr-4">
                 <Header menuItems={menuItems} />
-                <main className="flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
+                <main
+                    className="flex-1 items-start
+                        bg-white  h-full w-full
+                        p-4 sm:px-10 sm:py-4
+                        sm:rounded-3xl
+                        "
+                >
                     <Outlet />
                 </main>
             </div>

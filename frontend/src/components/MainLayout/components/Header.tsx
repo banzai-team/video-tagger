@@ -13,7 +13,7 @@ type HeaderProps = {
 const Header: React.FC<HeaderProps> = ({menuItems}) => {
     console.log(menuItems);
     return (
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-sidebar px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
             <Sheet>
                 <SheetTrigger asChild>
                     <Button size="icon" variant="light" className="sm:hidden">
@@ -44,15 +44,15 @@ const Header: React.FC<HeaderProps> = ({menuItems}) => {
                                     key={`mobile-menu-item-${key}`}
                                     to={item.link}
                                     className="
-                                    py-3 px-2 w-full
-                                    flex flex-row items-center gap-2
-                                    text-white rounded-md
-                                    transition-all duration-500
+                                            py-3 px-4 w-full text-sm
+                                        flex flex-row items-center gap-2
+                                        text-gray-500 rounded-md
+                                        transition-all duration-500
 
-                                    cursor-pointer hover:bg-white/10
-                                    aria-[current=page]:pointer-events-none
-                                    aria-[current=page]:bg-white/20
-                                    aria-[current=page]:text-blue-500
+                                        cursor-pointer hover:text-white
+                                        aria-[current=page]:pointer-events-none
+                                        aria-[current=page]:bg-white/10
+                                        aria-[current=page]:text-white
                                 "
                                 >
                                     {item.icon}

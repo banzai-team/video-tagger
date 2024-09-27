@@ -10,13 +10,14 @@ type SidebarProps = {
 
 const Sidebar: React.FC<SidebarProps> = ({menuItems}) => {
     return (
-        <aside className="fixed inset-y-0 left-0 z-10 hidden w-52 flex-col border-r bg-background sm:flex shadow-lg">
-            <nav className="flex flex-col items-start gap-2 px-4 sm:py-8">
+        <aside className="fixed inset-y-0 left-0 z-10 hidden w-56 flex-col bg-sidebar sm:flex">
+            <nav className="flex flex-col items-start gap-2 px-2 sm:py-8">
                 <Link
                     to="/"
                     className="
                         w-full text-white font-bold
-                        text-3xl pb-7 cursor-pointer
+                        text-3xl mb-5 cursor-pointer
+                        flex justify-center items-center
                         transition-all duration-500 hover:opacity-80"
                 >
                     VIDEO TAGS
@@ -28,15 +29,15 @@ const Sidebar: React.FC<SidebarProps> = ({menuItems}) => {
                                         key={`menu-item-${key}`}
                                         to={item.link}
                                         className="
-                                            py-3 px-2 w-full
+                                            py-3 px-4 w-full text-sm
                                             flex flex-row items-center gap-2
-                                            text-white rounded-md
+                                            text-gray-500 rounded-md
                                             transition-all duration-500
 
-                                            cursor-pointer hover:bg-white/10
+                                            cursor-pointer hover:text-white
                                             aria-[current=page]:pointer-events-none
-                                            aria-[current=page]:bg-white/20
-                                            aria-[current=page]:text-blue-500
+                                            aria-[current=page]:bg-white/10
+                                            aria-[current=page]:text-white
                                         ">
                                         {item.icon}
                                         {item.text}

@@ -16,19 +16,19 @@ const InnerRouter = () => {
             children: [
                 {
                     index: true,
-                    element: <div>Ваши видео</div>,
+                    element: <h2>Ваши видео</h2>,
                 },
                 {
                     path: Routes.New,
-                    element: <div>Добавить видео</div>,
+                    element: <h2>Добавить видео</h2>,
                 },
                 {
                     path: `${Routes.Video}/:id`,
-                    element: <div>Выбранное видео</div>,
+                    element: <h2>Выбранное видео</h2>,
                 },
                 {
                     path: "*",
-                    element: <div>404</div>,
+                    element: <h2>404</h2>,
                 },
             ],
         },

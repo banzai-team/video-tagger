@@ -75,4 +75,9 @@
   body {
     @apply bg-white text-gray-800 overflow-hidden w-screen h-screen;
   }
+
+  h2 {
+    @apply font-bold;
+    @apply text-2xl sm:text-3xl;
+  }
 }
