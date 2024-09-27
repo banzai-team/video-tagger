@@ -5,7 +5,7 @@ from app.db import engine
 from app.db import video  # Import your models
 
 # Create database tables
-video.Base.metadata.create_all(bind=engine)
+# video.Base.metadata.create_all(bind=engine)
 
 from app.apis import v1_router
 
