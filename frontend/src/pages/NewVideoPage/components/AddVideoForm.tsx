@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 // import { Input } from '~/components/ui/input';
 // import { Button } from '~/components/ui/button';
 // import Dropzone from "~/components/Dropzone";
-import {FileCheck2, X} from "lucide-react";
+import {FileVideo2, X} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import {Spinner} from "@/components/ui/spinner.tsx";
 import Dropzone from "@/components/Dropzone";
@@ -78,13 +78,13 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
                         <div className="flex flex-row gap-4">
                           <div
                               style={{backgroundImage: 'url(/round.svg)'}}
-                              className="bg-center bg-no-repeat bg-cover relative p-4 flex h-36 w-40 flex-col items-center justify-center rounded-md bg-zinc-100 md:p-10 md:h-48"
+                              className="bg-center bg-no-repeat bg-cover relative p-4 flex h-14 w-32 flex-col items-center justify-center rounded-md bg-zinc-100 md:p-2 md:h-20"
                           >
-                            <Button className="absolute top-1 right-0" variant="ghost" size="sm"
+                            <Button className="absolute top-1 right-1" variant="ghost" size="xs"
                                     onClick={() => formik.setFieldValue("files", null)}>
-                              <X className="text-destructive h-6 w-6 cursor-pointer hover:opacity-50"/>
+                              <X className=" h-5 w-5 cursor-pointer hover:opacity-50"/>
                             </Button>
-                            <FileCheck2 className="h-8 w-8 text-primary"/>
+                            <FileVideo2 className="h-8 w-8 text-accent"/>
                           </div>
                           <div>
                             <div
@@ -125,7 +125,7 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
         </div>
       </div>
 
-      <div className="justify-end">
+      <div className="justify-end pt-4 lg:pt-0">
         {
           formik.isSubmitting
               ? <Spinner className="my-1"/>

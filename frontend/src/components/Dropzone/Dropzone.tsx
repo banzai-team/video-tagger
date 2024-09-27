@@ -17,7 +17,7 @@ const Dropzone: React.FC<DropzoneProps> = ({onDrop, acceptTypes, disabled}) => {
   return (
     <div
       {...getRootProps({ className: "dropzone" })}
-      className="bg-center bg-no-repeat bg-cover dropzone cursor-pointer p-4 flex h-36 w-full flex-col items-center justify-center rounded-md border border-dashed border-gray-300 md:h-64 lg:w-96 md:p-10"
+      className="bg-center bg-no-repeat bg-cover dropzone cursor-pointer p-1 flex h-32 w-full flex-col items-center justify-center rounded-md border border-dashed border-gray-300 md:h-32 lg:w-96 md:p-5"
       style={disabled ? {opacity: 0.5, cursor: "auto"} : {}}
     >
       <input {...getInputProps()} disabled={disabled} />

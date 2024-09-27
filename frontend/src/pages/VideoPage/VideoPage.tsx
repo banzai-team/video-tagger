@@ -7,6 +7,7 @@ import {Badge} from "@/components/ui/badge.tsx";
 
 const VideoPage: React.FC = () => {
     const { id = '' } = useParams();
+    const description = "lalalalalalalala";
     const tags = [
         "tagsadasd","tag","tagddd","tag","tag","tag","tag","tag","tag","tag","tag","tag","tag","tag","tag","tag"
     ]
@@ -39,6 +40,10 @@ const VideoPage: React.FC = () => {
                                 <Badge key={`video-tag-${key}`} variant="accent">{tag}</Badge>
                             ))
                         }
+                    </div>
+                    <div className="pt-5  flex gap-1 flex-wrap md:pt-10">
+                        <div className="font-bold">Описание:</div>
+                        <div className="text-gray-500">{description}</div>
                     </div>
                 </div>
             </div>
