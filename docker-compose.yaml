@@ -37,7 +37,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ${ROOT_DIR}app_cache/db:/var/lib/postgresql/data
+      - ${ROOT_DIR}.app_cache/db:/var/lib/postgresql/data
     restart: always
 
   api:
