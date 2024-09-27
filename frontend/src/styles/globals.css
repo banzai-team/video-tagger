@@ -73,6 +73,6 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white text-gray-800 overflow-hidden w-screen h-screen;
   }
 }
