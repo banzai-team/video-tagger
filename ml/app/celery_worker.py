@@ -1,12 +1,21 @@
 import os
 from celery import Celery, chain
-from app.config import CELERY_BROKER_URL, CELERY_RESULT_BACKEND
+from app.config import (
+    CELERY_BROKER_URL,
+    CELERY_RESULT_BACKEND,
+    HF_MODEL_NAME,
+    FILE_PATH_TRAIN,
+    FILE_PATH_IAB,
+)
 import time
 from kombu import Queue
 from app.logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from app.db.engine import get_db
 from app.db.video import Video
+from ml.ml_lib.model_registry import load_model_hf
+from ml.ml_lib.utils import create_nested_structure, load_data
+from ml.scripts.pipelines.llm_hierarcial import VideoFeatures, predict_video
 from ml_lib.audio.s2t import WhisperTranscriber
 from ml_lib.video.video_helper import extract_audio_from_video
 
@@ -34,6 +43,13 @@ celery.conf.update(
     task_track_started=True,
     result_expires=3600,
 )
+
+data, taxonomy = load_data(file_path_train=FILE_PATH_TRAIN, file_path_iab=FILE_PATH_IAB)
+nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
+
+lm = load_model_hf(HF_MODEL_NAME)
+data, taxonomy = load_data(file_path_train=FILE_PATH_TRAIN, file_path_iab=FILE_PATH_IAB)
+nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
 
 
 @celery.task(bind=True)
@@ -82,9 +98,23 @@ def s2t(self, input, **kwargs):
 def process_video_text(self, input, **kwargs):
     video_id = input["video_id"]
     text = input["text"]
-    logger.info(f"Extracted video text: {text}")
+    logger.info(f"Process video with model. Video id: {video_id}")
 
-    update_video(video_id=video_id, status="TEXT_PROCESSED", tags='["kids", "cartoon"]')
+    video = get_video_by_id(video_id=video_id)
+    prediction = predict_video(
+        lm,
+        nested_taxonomy,
+        VideoFeatures(
+            video_id=video_id, title=video.title, description=video.description
+        ),
+    )
+    logger.info(f"Predicted tags for video: {video_id} {str(prediction)}")
+
+    update_video(
+        video_id=video_id,
+        status="MODEL_PROCESSED",
+        tags=f'[{",".join(prediction.predicted_tags)}]',
+    )
 
     return {"status": "OK"}
 
