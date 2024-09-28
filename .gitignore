@@ -1,12 +1,5 @@
 .env
 .history
 .app_cache/
-<<<<<<< HEAD
-=======
-data/**/videos/
-data/**/.DS_Store
-data/**/*.ipynb
-data/submits/
->>>>>>> origin/main
 .idea
 downloads/
