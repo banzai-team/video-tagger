@@ -7,3 +7,6 @@ data/**/*.ipynb
 data/submits/
 .idea
 downloads/
+# data/
+.idea
+
