@@ -76,8 +76,25 @@ services:
       - rabbitmq
       - migrate
     restart: always
+  
+  ml-celery-worker:
+    restart: always
+    build: 
+      context: ./ml
+      dockerfile: Dockerfile
+    command: celery -A app.celery_worker worker --loglevel=info
+    volumes:
+      - ./ml/:/app
+    depends_on:
+      - rabbitmq
+      - db
+      - migrate
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=rpc://guest:guest@rabbitmq:5672//
 
-  celery_worker:
+  api-celery_worker:
     restart: always
     build: 
       context: ./backend
