@@ -40,7 +40,7 @@ export type OpenAPIConfig = {
 };
 
 export const OpenAPI: OpenAPIConfig = {
-  BASE: process.env.API_URL || 'http://api.localhost',
+  BASE: (window as any).API_URL || process.env.API_URL || 'http://api.localhost',
   CREDENTIALS: 'include',
   ENCODE_PATH: undefined,
   HEADERS: undefined,
