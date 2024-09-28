@@ -1,13 +1,13 @@
 import os
 from celery import Celery, chain
 from app.config import (
-    CELERY_BROKER_URL,
-    CELERY_RESULT_BACKEND,
     MODEL_NAME,
     HF_MODEL_NAME,
     OPENROUTER_MODEL_NAME,
-    FILE_PATH_TRAIN,
+    FILE_PATH_PREDICT,
     FILE_PATH_IAB,
+    CELERY_BROKER_URL,
+    CELERY_RESULT_BACKEND,
 )
 import time
 from kombu import Queue
@@ -15,9 +15,9 @@ from app.logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from app.db.engine import get_db
 from app.db.video import Video
-from ml.ml_lib.model_registry import load_model_hf, load_model_openrounter
-from ml.ml_lib.utils import create_nested_structure, load_data
-from ml.scripts.pipelines.llm_hierarcial import VideoFeatures, predict_video
+from ml_lib.model_registry import load_model_hf, load_model_openrounter
+from ml_lib.utils import create_nested_structure, load_data
+from scripts.pipelines.llm_hierarcial import VideoFeatures, predict_video
 from ml_lib.audio.s2t import WhisperTranscriber
 from ml_lib.video.video_helper import extract_audio_from_video
 
@@ -45,8 +45,19 @@ celery.conf.update(
     task_track_started=True,
     result_expires=3600,
 )
+print_model_info = f"""
+Initializing model with
+    FILE_PATH_TRAIN: {FILE_PATH_PREDICT}
+    FILE_PATH_IAB: {FILE_PATH_IAB}
+    MODEL_NAME: {MODEL_NAME}
+    HF_MODEL_NAME: {HF_MODEL_NAME}
+    OPENROUTER_MODEL_NAME: {OPENROUTER_MODEL_NAME}
+"""
+logger.info(print_model_info)
 
-data, taxonomy = load_data(file_path_train=FILE_PATH_TRAIN, file_path_iab=FILE_PATH_IAB)
+data, taxonomy = load_data(
+    file_path_train=FILE_PATH_PREDICT, file_path_iab=FILE_PATH_IAB
+)
 nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
 
 if MODEL_NAME == "hf":
