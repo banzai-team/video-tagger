@@ -20,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({menuItems}) => {
                         flex justify-center items-center
                         transition-all duration-500 hover:opacity-80"
                 >
-                    VIDEO TAGS
+                    <img src="/logo-light.svg" alt="VideoTags" className="h-8"/>
                     <span className="sr-only">VideoTags</span>
                 </Link>
                 {
