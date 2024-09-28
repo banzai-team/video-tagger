@@ -3,7 +3,9 @@ from celery import Celery, chain
 from app.config import (
     CELERY_BROKER_URL,
     CELERY_RESULT_BACKEND,
+    MODEL_NAME,
     HF_MODEL_NAME,
+    OPENROUTER_MODEL_NAME,
     FILE_PATH_TRAIN,
     FILE_PATH_IAB,
 )
@@ -13,7 +15,7 @@ from app.logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from app.db.engine import get_db
 from app.db.video import Video
-from ml.ml_lib.model_registry import load_model_hf
+from ml.ml_lib.model_registry import load_model_hf, load_model_openrounter
 from ml.ml_lib.utils import create_nested_structure, load_data
 from ml.scripts.pipelines.llm_hierarcial import VideoFeatures, predict_video
 from ml_lib.audio.s2t import WhisperTranscriber
@@ -47,7 +49,12 @@ celery.conf.update(
 data, taxonomy = load_data(file_path_train=FILE_PATH_TRAIN, file_path_iab=FILE_PATH_IAB)
 nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
 
-lm = load_model_hf(HF_MODEL_NAME)
+if MODEL_NAME == "hf":
+    lm = load_model_hf(HF_MODEL_NAME)
+elif MODEL_NAME == "openrouter":
+    lm = load_model_openrounter(OPENROUTER_MODEL_NAME)
+else:
+    raise NotImplementedError(f"{MODEL_NAME}")
 data, taxonomy = load_data(file_path_train=FILE_PATH_TRAIN, file_path_iab=FILE_PATH_IAB)
 nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
 

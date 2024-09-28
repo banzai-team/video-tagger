@@ -20,6 +20,8 @@ os.makedirs("/tmp/celery", exist_ok=True)
 
 # env var MODEL_PATH
 MODEL_PATH = os.environ.get("LLAMA_MODEL_PATH")
-HF_MODEL_NAME = os.environ.get("HF_MODEL_NAME")
+MODEL_NAME = os.environ.get("MODEL_NAME", "hf")
+HF_MODEL_NAME = os.environ.get("HF_MODEL_NAME", "unsloth/Llama-3.2-1B-Instruct")
+OPENROUTER_MODEL_NAME = os.environ.get("OPENROUTER_MODEL_NAME")
 FILE_PATH_TRAIN = os.environ.get("FILE_PATH_TRAIN")
 FILE_PATH_IAB = os.environ.get("FILE_PATH_IAB")
