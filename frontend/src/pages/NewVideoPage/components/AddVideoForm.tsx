@@ -9,10 +9,23 @@ import { Spinner } from "@/components/ui/spinner.tsx";
 import Dropzone from "@/components/Dropzone";
 import { Input } from "@/components/ui/input.tsx";
 // import {Spinner} from "~/components/ui/spinner";
+import * as Yup from "yup";
 
 type AddVacancyFormProps = {
   onSubmit?: (values: { link?: string; files?: any, title?: string; description?: string; }) => Promise<any>;
 };
+
+const validationSchema = Yup.object({
+  files: Yup.mixed().nullable(),
+  title: Yup.string().when('files', {
+    is: value => value !== null,
+    then: schema => schema.required('Required field')
+  }),
+  description: Yup.string().when('files', {
+    is: value => value !== null,
+    then: schema => schema.required('Required field')
+  })
+})
 
 const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
   const formik = useFormik<{
@@ -39,8 +52,14 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
       await onSubmit(values);
       setSubmitting(false);
     },
-    // validationSchema,
+    validationSchema,
   });
+
+  const titleError = formik.touched?.title && formik.errors?.title ? formik.errors.title : "";
+  const titleColor = titleError ? 'text-destructive' : 'text-gray-800'
+
+  const descriptionError = formik.touched?.description && formik.errors?.description ? formik.errors.description : "";
+  const descriptionColor = descriptionError ? 'text-destructive' : 'text-gray-800'
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -60,12 +79,12 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
           </div>
           <div className="flex flex-col gap-3">
             <div>
-              <div className="text-xs text-gray-800 pb-1">Заголовок видео</div>
+              <div className={`text-xs pb-1 ${titleColor}`}>Заголовок видео</div>
               <Input placeholder="Введите данные видео" {...formik.getFieldProps('title')}
                 disabled={!!formik.values.link} />
             </div>
             <div>
-              <div className="text-xs text-gray-800 pb-1">Описание видео</div>
+              <div className={`text-xs pb-1 ${descriptionColor}`}>Описание видео</div>
               <Input placeholder="Введите данные видео" {...formik.getFieldProps('description')}
                 disabled={!!formik.values.link} />
             </div>
