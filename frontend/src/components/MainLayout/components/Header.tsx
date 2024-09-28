@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({menuItems}) => {
                     </Button>
                 </SheetTrigger>
                 <div className="text-white font-bold text-2xl sm:hidden">
-                    VIDEO TAGS
+                    <img src="/logo-light.svg" alt="VideoTags" className="h-8"/>
                 </div>
                 <SheetContent side="left" className="sm:max-w-xs">
                     <nav className="grid gap-2 text-lg font-medium">
@@ -33,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({menuItems}) => {
                                     text-xl cursor-pointer pb-5
                                     transition-all duration-500 hover:opacity-80"
                             >
-                                VIDEO TAGS
+                                <img src="/logo-light.svg" alt="VideoTags" className="h-6"/>
                                 <span className="sr-only">VideoTags</span>
                             </Link>
                         </SheetClose>

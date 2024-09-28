@@ -20,14 +20,17 @@ export type ValidationError = {
     type: string;
 };
 
-export type VideoInfo = {
+export type VideoRepr = {
     id: number;
-    file_path: string;
     status: string;
-    progress: number;
-    result: string;
-    created_at: string;
-    updated_at: string;
+    title: string;
+    description: string | null;
+    url: string | null;
+    file_path: string | null;
+    tags: string | null;
+    video_path: string | null;
+    text: string | null;
+    audio_path: string | null;
 };
 
 export type VideoUrlInput = {
@@ -46,7 +49,18 @@ export type ProcessVideoFileV1ProcessVideoFilePostData = {
 
 export type ProcessVideoFileV1ProcessVideoFilePostResponse = TaskOutput;
 
-export type ListVideosV1ListVideosGetResponse = Array<VideoInfo>;
+export type GetVideoByIdV1VideosIdGetData = {
+    id: unknown;
+};
+
+export type GetVideoByIdV1VideosIdGetResponse = VideoRepr;
+
+export type GetVideosV1VideosGetData = {
+    size?: unknown;
+    skip?: unknown;
+};
+
+export type GetVideosV1VideosGetResponse = Array<VideoRepr>;
 
 export type HealthHealthGetResponse = number;
 
@@ -81,13 +95,33 @@ export type $OpenApiTs = {
             };
         };
     };
-    '/v1/list_videos': {
+    '/v1/videos/{id}': {
         get: {
+            req: GetVideoByIdV1VideosIdGetData;
             res: {
                 /**
                  * Successful Response
                  */
-                200: Array<VideoInfo>;
+                200: VideoRepr;
+                /**
+                 * Validation Error
+                 */
+                422: HTTPValidationError;
+            };
+        };
+    };
+    '/v1/videos': {
+        get: {
+            req: GetVideosV1VideosGetData;
+            res: {
+                /**
+                 * Successful Response
+                 */
+                200: Array<VideoRepr>;
+                /**
+                 * Validation Error
+                 */
+                422: HTTPValidationError;
             };
         };
     };

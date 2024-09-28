@@ -3,11 +3,11 @@ import { useFormik } from 'formik';
 // import { Input } from '~/components/ui/input';
 // import { Button } from '~/components/ui/button';
 // import Dropzone from "~/components/Dropzone";
-import {FileVideo2, X} from "lucide-react";
-import {Button} from "@/components/ui/button.tsx";
-import {Spinner} from "@/components/ui/spinner.tsx";
+import { FileVideo2, X } from "lucide-react";
+import { Button } from "@/components/ui/button.tsx";
+import { Spinner } from "@/components/ui/spinner.tsx";
 import Dropzone from "@/components/Dropzone";
-import {Input} from "@/components/ui/input.tsx";
+import { Input } from "@/components/ui/input.tsx";
 // import {Spinner} from "~/components/ui/spinner";
 
 type AddVacancyFormProps = {
@@ -34,14 +34,13 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
       link: "",
       files: null,
     },
-    onSubmit: async (values, {setSubmitting}) => {
+    onSubmit: async (values, { setSubmitting }) => {
       setSubmitting(true);
-      if (onSubmit) await onSubmit(values);
+      await onSubmit(values);
       setSubmitting(false);
     },
     // validationSchema,
   });
-
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -63,62 +62,62 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
             <div>
               <div className="text-xs text-gray-800 pb-1">Заголовок видео</div>
               <Input placeholder="Введите данные видео" {...formik.getFieldProps('title')}
-                     disabled={!!formik.values.link}/>
+                disabled={!!formik.values.link} />
             </div>
             <div>
               <div className="text-xs text-gray-800 pb-1">Описание видео</div>
               <Input placeholder="Введите данные видео" {...formik.getFieldProps('description')}
-                     disabled={!!formik.values.link}/>
+                disabled={!!formik.values.link} />
             </div>
             <div>
               <div className="text-xs text-gray-800 pb-1">Видеофайл</div>
               {
                 formik.values.files
-                    ? (
-                        <div className="flex flex-row gap-4">
-                          <div
-                              style={{backgroundImage: 'url(/round.svg)'}}
-                              className="bg-center bg-no-repeat bg-cover relative p-4 flex h-14 w-32 flex-col items-center justify-center rounded-md bg-zinc-100 md:p-2 md:h-20"
-                          >
-                            <Button className="absolute top-1 right-1" variant="ghost" size="lg"
-                                    onClick={() => formik.setFieldValue("files", null)}>
-                              <X className=" h-5 w-5 cursor-pointer hover:opacity-50"/>
-                            </Button>
-                            <FileVideo2 className="h-8 w-8 text-accent"/>
-                          </div>
-                          <div>
-                            <div
-                                className="font-medium pt-2 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-24 md:max-w-32 lg:max-w-52 xl:max-w-80">{formik.values.files[0].name}</div>
-                            <div
-                                className="text-xs text-gray-800 pt-1">{(formik.values.files[0].size / 1024 / 1024).toFixed(2)}Мб
-                            </div>
-                          </div>
+                  ? (
+                    <div className="flex flex-row gap-4">
+                      <div
+                        style={{ backgroundImage: 'url(/round.svg)' }}
+                        className="bg-center bg-no-repeat bg-cover relative p-4 flex h-14 w-32 flex-col items-center justify-center rounded-md bg-zinc-100 md:p-2 md:h-20"
+                      >
+                        <Button className="absolute top-1 right-1" variant="ghost" size="lg"
+                          onClick={() => formik.setFieldValue("files", null)}>
+                          <X className=" h-5 w-5 cursor-pointer hover:opacity-50" />
+                        </Button>
+                        <FileVideo2 className="h-8 w-8 text-accent" />
+                      </div>
+                      <div>
+                        <div
+                          className="font-medium pt-2 whitespace-nowrap overflow-hidden overflow-ellipsis max-w-24 md:max-w-32 lg:max-w-52 xl:max-w-80">{formik.values.files[0].name}</div>
+                        <div
+                          className="text-xs text-gray-800 pt-1">{(formik.values.files[0].size / 1024 / 1024).toFixed(2)}Мб
                         </div>
-                    )
-                    : (
-                        <Dropzone onDrop={(acceptedFiles: any[]) => {
-                          acceptedFiles.forEach((file) => {
-                            const reader = new FileReader()
+                      </div>
+                    </div>
+                  )
+                  : (
+                    <Dropzone onDrop={(acceptedFiles: any[]) => {
+                      acceptedFiles.forEach((file) => {
+                        const reader = new FileReader()
 
-                            reader.onabort = () => console.log('file reading was aborted')
-                            reader.onerror = () => console.log('file reading has failed')
-                            reader.onload = () => {
-                              // Do whatever you want with the file contents
-                              // const binaryStr = reader.result
-                              formik.setFieldValue("files", [file]);
-                            }
-                            reader.readAsArrayBuffer(file)
-                          })
-                        }}
-                                  disabled={!!formik.values.link}
-                                  acceptTypes={{
-                                    "video/mp4": [".mp4"],
-                                    "video/mpeg": [".mpeg"],
-                                    "video/mov": [".mov"],
-                                    "video/webm": [".webm"]
-                                  }}
-                        />
-                    )
+                        reader.onabort = () => console.log('file reading was aborted')
+                        reader.onerror = () => console.log('file reading has failed')
+                        reader.onload = () => {
+                          // Do whatever you want with the file contents
+                          // const binaryStr = reader.result
+                          formik.setFieldValue("files", [file]);
+                        }
+                        reader.readAsArrayBuffer(file)
+                      })
+                    }}
+                      disabled={!!formik.values.link}
+                      acceptTypes={{
+                        "video/mp4": [".mp4"],
+                        "video/mpeg": [".mpeg"],
+                        "video/mov": [".mov"],
+                        "video/webm": [".webm"]
+                      }}
+                    />
+                  )
               }
             </div>
           </div>
@@ -128,12 +127,12 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
       <div className="justify-end pt-4 lg:pt-0">
         {
           formik.isSubmitting
-              ? <Spinner className="my-1"/>
-              : (
-                  <Button type="submit" disabled={!formik.values.link && !formik.values.files}>
-                    Добавить
-                  </Button>
-              )
+            ? <Spinner className="my-1" />
+            : (
+              <Button type="submit" disabled={!formik.values.link && !formik.values.files}>
+                Добавить
+              </Button>
+            )
         }
       </div>
     </form>

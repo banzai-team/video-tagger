@@ -1,14 +1,13 @@
----
 openapi: 3.1.0
 info:
   title: ml service
   description: Fastapi service for gk
   version: '0.1'
 paths:
-  "/v1/process_video_url":
+  /v1/process_video_url:
     post:
       tags:
-      - Inference endpoints
+        - Inference endpoints
       summary: Process Video Url
       description: Обрабатывает видео по URL
       operationId: process_video_url_v1_process_video_url_post
@@ -16,7 +15,7 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/VideoUrlInput"
+              $ref: '#/components/schemas/VideoUrlInput'
         required: true
       responses:
         '202':
@@ -24,17 +23,17 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/TaskOutput"
+                $ref: '#/components/schemas/TaskOutput'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/v1/process_video_file":
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/process_video_file:
     post:
       tags:
-      - Inference endpoints
+        - Inference endpoints
       summary: Process Video File
       description: Обрабатывает загруженное видео
       operationId: process_video_file_v1_process_video_file_post
@@ -42,7 +41,8 @@ paths:
         content:
           multipart/form-data:
             schema:
-              "$ref": "#/components/schemas/Body_process_video_file_v1_process_video_file_post"
+              $ref: >-
+                #/components/schemas/Body_process_video_file_v1_process_video_file_post
         required: true
       responses:
         '202':
@@ -50,34 +50,79 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/TaskOutput"
+                $ref: '#/components/schemas/TaskOutput'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/v1/list_videos":
+                $ref: '#/components/schemas/HTTPValidationError'
+  '/v1/videos/{id}':
     get:
       tags:
-      - Video Management
-      summary: List Videos
-      description: Получить список всех видео
-      operationId: list_videos_v1_list_videos_get
+        - Inference endpoints
+      summary: Get Video By Id
+      description: Получает видео по идентфиикатору
+      operationId: get_video_by_id_v1_videos__id__get
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            title: Id
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                items:
-                  "$ref": "#/components/schemas/VideoInfo"
-                type: array
-                title: Response List Videos V1 List Videos Get
-  "/health":
+                $ref: '#/components/schemas/VideoRepr'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/videos:
     get:
       tags:
-      - System probs
+        - Inference endpoints
+      summary: Get Videos
+      description: Получает список видео
+      operationId: get_videos_v1_videos_get
+      parameters:
+        - name: skip
+          in: query
+          required: false
+          schema:
+            default: 0
+            title: Skip
+        - name: size
+          in: query
+          required: false
+          schema:
+            default: 10
+            title: Size
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VideoRepr'
+                title: Response Get Videos V1 Videos Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /health:
+    get:
+      tags:
+        - System probs
       summary: Health
       operationId: health_health_get
       responses:
@@ -104,15 +149,15 @@ components:
           title: Title
       type: object
       required:
-      - file
-      - description
-      - title
+        - file
+        - description
+        - title
       title: Body_process_video_file_v1_process_video_file_post
     HTTPValidationError:
       properties:
         detail:
           items:
-            "$ref": "#/components/schemas/ValidationError"
+            $ref: '#/components/schemas/ValidationError'
           type: array
           title: Detail
       type: object
@@ -124,15 +169,15 @@ components:
           title: Task Id
       type: object
       required:
-      - task_id
+        - task_id
       title: TaskOutput
     ValidationError:
       properties:
         loc:
           items:
             anyOf:
-            - type: string
-            - type: integer
+              - type: string
+              - type: integer
           type: array
           title: Location
         msg:
@@ -143,45 +188,69 @@ components:
           title: Error Type
       type: object
       required:
-      - loc
-      - msg
-      - type
+        - loc
+        - msg
+        - type
       title: ValidationError
-    VideoInfo:
+    VideoRepr:
       properties:
         id:
           type: integer
           title: Id
-        file_path:
-          type: string
-          title: File Path
         status:
           type: string
           title: Status
-        progress:
-          type: number
-          title: Progress
-        result:
+        title:
           type: string
-          title: Result
-        created_at:
-          type: string
-          format: date-time
-          title: Created At
-        updated_at:
-          type: string
-          format: date-time
-          title: Updated At
+          title: Title
+        description:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Description
+        url:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Url
+        file_path:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: File Path
+        tags:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Tags
+        video_path:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Video Path
+        text:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Text
+        audio_path:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Audio Path
       type: object
       required:
-      - id
-      - file_path
-      - status
-      - progress
-      - result
-      - created_at
-      - updated_at
-      title: VideoInfo
+        - id
+        - status
+        - title
+        - description
+        - url
+        - file_path
+        - tags
+        - video_path
+        - text
+        - audio_path
+      title: VideoRepr
     VideoUrlInput:
       properties:
         video_url:
@@ -192,5 +261,5 @@ components:
           title: Video Url
       type: object
       required:
-      - video_url
+        - video_url
       title: VideoUrlInput

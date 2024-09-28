@@ -77,42 +77,101 @@ export const $ValidationError = {
     title: 'ValidationError'
 } as const;
 
-export const $VideoInfo = {
+export const $VideoRepr = {
     properties: {
         id: {
             type: 'integer',
             title: 'Id'
         },
-        file_path: {
-            type: 'string',
-            title: 'File Path'
-        },
         status: {
             type: 'string',
             title: 'Status'
         },
-        progress: {
-            type: 'number',
-            title: 'Progress'
-        },
-        result: {
+        title: {
             type: 'string',
-            title: 'Result'
+            title: 'Title'
         },
-        created_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Created At'
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
         },
-        updated_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Updated At'
+        url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Url'
+        },
+        file_path: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'File Path'
+        },
+        tags: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tags'
+        },
+        video_path: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Video Path'
+        },
+        text: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Text'
+        },
+        audio_path: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Audio Path'
         }
     },
     type: 'object',
-    required: ['id', 'file_path', 'status', 'progress', 'result', 'created_at', 'updated_at'],
-    title: 'VideoInfo'
+    required: ['id', 'status', 'title', 'description', 'url', 'file_path', 'tags', 'video_path', 'text', 'audio_path'],
+    title: 'VideoRepr'
 } as const;
 
 export const $VideoUrlInput = {

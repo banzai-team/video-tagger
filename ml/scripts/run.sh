@@ -43,7 +43,7 @@ PIPELINE_NAME="llm_hierarcial"
 SUBMITION_FILE=${SUBMITION_FILE:-$DATA_DIR/submits/$PIPELINE_NAME/submission_$(date +"%Y-%m-%d_%H-%M-%S").csv}
 
 if [ "$PIPELINE_NAME" == "baseline" ]; then
-    PYTHONPATH=$ROOT_DIR python3 $ROOT_DIR/scripts/pipelines/baseline.py \
+    python3 $ROOT_DIR/scripts/pipelines/baseline.py \
         --submission_file $SUBMITION_FILE \
         --file_path_train $PREDICT_DATA_CSV_FILE \
         --file_path_iab $TAXONOMY_FILE \
