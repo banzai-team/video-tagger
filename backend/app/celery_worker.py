@@ -5,11 +5,9 @@ import time
 import requests
 from app.logger import logger
 import yt_dlp
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-import uuid
 from app.db.engine import get_db
-from app.db.video import Status, Video
+from app.db.video import Video
 from kombu import Queue
 
 celery = Celery(
@@ -71,7 +69,6 @@ def download_video(self, url, base_path="downloads"):
     resp = requests.get(pls)
     if resp.status_code == 200:
         data = resp.json()
-        logger.info(data)
         title = data["title"]
         description = data["description"]
         video_id = create_video(
@@ -90,6 +87,8 @@ def download_video(self, url, base_path="downloads"):
     else:
         logger.error(f"Video with URL {url} was not found")
 
+    return {"video_id": video_id}
+
 
 @celery.task(bind=True)
 def upload_video(self, title, description, contents, base_path="downloads"):
@@ -103,7 +102,7 @@ def upload_video(self, title, description, contents, base_path="downloads"):
     update_video(video_id, status="DOWNLADED", file_path=file_path)
 
     logger.info("Uploaded video")
-    return {"video_id": 2229}
+    return {"video_id": video_id}
 
 
 def extract_rutube_id(url):
