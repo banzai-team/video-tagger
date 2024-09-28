@@ -44,11 +44,11 @@ def process_video_tags_for_url(url):
     ).delay()
 
 
-def process_video_tags_for_file(title, contents):
+def process_video_tags_for_file(title, description, contents):
     return chain(
         signature(
             "app.celery_worker.upload_video",
-            kwargs={"title": title, "description": "some descr", "contents": contents},
+            kwargs={"title": title, "description": description, "contents": contents},
             queue="video_upload_queue",
         ),
         signature(
