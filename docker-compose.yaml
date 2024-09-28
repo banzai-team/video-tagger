@@ -49,6 +49,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     command: alembic upgrade head
+    working_dir: /app/app
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     depends_on:
