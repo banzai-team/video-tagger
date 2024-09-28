@@ -66,8 +66,12 @@ elif MODEL_NAME == "openrouter":
     lm = load_model_openrounter(OPENROUTER_MODEL_NAME)
 else:
     raise NotImplementedError(f"{MODEL_NAME}")
-data, taxonomy = load_data(file_path_train=FILE_PATH_TRAIN, file_path_iab=FILE_PATH_IAB)
+data, taxonomy = load_data(
+    file_path_train=FILE_PATH_PREDICT, file_path_iab=FILE_PATH_IAB
+)
 nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
+
+logger.info("""Model initialized""")
 
 
 @celery.task(bind=True)
@@ -131,7 +135,7 @@ def process_video_text(self, input, **kwargs):
     update_video(
         video_id=video_id,
         status="MODEL_PROCESSED",
-        tags=f'[{",".join(prediction.predicted_tags)}]',
+        tags=f'[{",".join(prediction["predicted_tags"])}]',
     )
 
     return {"status": "OK"}

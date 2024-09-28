@@ -39,3 +39,7 @@ accelerate
 openai-whisper
 yt-dlp
 moviepy
+
+# for openrouter
+openai
+sentencepiece

@@ -98,9 +98,9 @@ services:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
       - CELERY_RESULT_BACKEND=rpc://guest:guest@rabbitmq:5672//
-      - MODEL_NAME=openrouter
+      - MODEL_NAME=hf
       - HF_MODEL_NAME=unsloth/Llama-3.2-1B-Instruct
-      - OPENROUTER_MODEL_NAME="openrouter_model_name"
+      - OPENROUTER_MODEL_NAME=unsloth/Llama-3.2-1B-Instruct
       - FILE_PATH_PREDICT=data/train_dataset_tag_video/baseline/train_data_categories.csv
       - FILE_PATH_IAB=data/data_prep/filtered_taxonomy.csv
       - OPENROUTER_API_KEY=${OPENAPI_API_KEY}
