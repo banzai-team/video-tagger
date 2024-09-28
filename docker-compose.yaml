@@ -46,7 +46,7 @@ services:
 
   migrate:
     build: 
-      context: ./ml
+      context: ./backend
       dockerfile: Dockerfile
     command: alembic upgrade head
     environment:
