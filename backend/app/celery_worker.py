@@ -32,38 +32,6 @@ celery.conf.update(
 
 
 def process_video_tags_for_url(url):
-    return chain(
-        signature(
-            "app.celery_worker.download_video",
-            kwargs={"url": url},
-            queue="video_upload_queue",
-        ),
-        signature(
-            "app.celery_worker.process_video",
-            kwargs={},  # можно здесь добавить какие то доп поля, они будут входными аргами таски
-            queue="video_processing_queue",
-        ),
-    ).delay()
-
-
-def process_video_tags_for_file(title, description, contents):
-    return chain(
-        signature(
-            "app.celery_worker.upload_video",
-            kwargs={"title": title, "description": description, "contents": contents},
-            queue="video_upload_queue",
-        ),
-        signature(
-            "app.celery_worker.process_video",
-            kwargs={},  # можно здесь добавить какие то доп поля, они будут входными аргами таски
-            queue="video_processing_queue",
-        ),
-    ).delay()
-
-
-@celery.task(bind=True)
-def download_video(self, url, base_path="downloads"):
-    logger.debug(f"Running download video job for {url}")
     pls = f"https://rutube.ru/api/play/options/{extract_rutube_id(url)}/?no_404=true&referer=https%3A%2F%2Frutube.ru"
 
     resp = requests.get(pls)
@@ -74,26 +42,61 @@ def download_video(self, url, base_path="downloads"):
         video_id = create_video(
             title, description=description, status="SUBMITTED", url=url
         )
-        video_path = base_path + f"/{video_id}/" + "video.mp4"
-        ydl_opts = {
-            "format": "bestvideo+bestaudio/best",
-            "outtmpl": video_path,
-        }
-
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
-
-        update_video(video_id, status="DOWNLADED", video_path=video_path)
+        chain(
+            signature(
+                "app.celery_worker.download_video",
+                kwargs={"url": url, "video_id": video_id},
+                queue="video_upload_queue",
+            ),
+            signature(
+                "app.celery_worker.process_video",
+                kwargs={},  # можно здесь добавить какие то доп поля, они будут входными аргами таски
+                queue="video_processing_queue",
+            ),
+        ).delay()
+        return video_id
     else:
-        logger.error(f"Video with URL {url} was not found")
+        raise Exception("Video was not found")
 
+
+def process_video_tags_for_file(title, description, contents):
+    video_id = create_video(title, description=description, status="SUBMITTED")
+
+    chain(
+        signature(
+            "app.celery_worker.upload_video",
+            kwargs={"video_id": video_id, "contents": contents},
+            queue="video_upload_queue",
+        ),
+        signature(
+            "app.celery_worker.process_video",
+            kwargs={},  # можно здесь добавить какие то доп поля, они будут входными аргами таски
+            queue="video_processing_queue",
+        ),
+    ).delay()
+
+    return video_id
+
+
+@celery.task(bind=True)
+def download_video(self, video_id, url, base_path="downloads"):
+    logger.debug(f"Running download video job for {url}")
+    video_path = base_path + f"/{video_id}/" + "video.mp4"
+    ydl_opts = {
+        "format": "bestvideo+bestaudio/best",
+        "outtmpl": video_path,
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
+    update_video(video_id, status="DOWNLADED", video_path=video_path)
     return {"video_id": video_id}
 
 
 @celery.task(bind=True)
-def upload_video(self, title, description, contents, base_path="downloads"):
-    logger.debug(f"Uploading video file for {title}")
-    video_id = create_video(title, description=description, status="SUBMITTED")
+def upload_video(self, video_id, contents, base_path="downloads"):
+    logger.debug(f"Uploading video file for {video_id}")
     video_path = base_path + f"/{video_id}/video.mp4"
     os.makedirs(base_path + f"/{video_id}", exist_ok=True)
     with open(video_path, "wb") as f:

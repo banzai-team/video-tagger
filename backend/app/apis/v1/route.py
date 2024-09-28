@@ -26,7 +26,7 @@ class VideoFileInput(BaseModel):
 
 
 class TaskOutput(BaseModel):
-    task_id: str
+    video_id: int
 
 
 class VideoRepr(BaseModel):
@@ -56,9 +56,8 @@ def process_video_url(input_data: VideoUrlInput) -> TaskOutput:
     if id is None and file is None:
         return status.HTTP_400_BAD_REQUEST
 
-    task_id = process_video_tags_for_url(str(input_data.video_url))
-    print(str(task_id))
-    return TaskOutput(task_id="22")
+    video_id = process_video_tags_for_url(str(input_data.video_url))
+    return TaskOutput(video_id=video_id)
 
 
 @router.post(
@@ -78,10 +77,9 @@ async def process_video_file(
             status_code=status.HTTP_400_BAD_REQUEST,
         )
     contents = file.file.read()
-    task_id = process_video_tags_for_file(title, description, contents)
-    print(str(task_id))
+    video_id = process_video_tags_for_file(title, description, contents)
 
-    return TaskOutput(task_id="222")
+    return TaskOutput(video_id=video_id)
 
 
 @router.get(
