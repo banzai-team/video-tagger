@@ -28,7 +28,6 @@ const MainLayout: React.FC = () => {
     return (
         <div
             className="flex min-h-screen h-screen w-full flex-col bg-center bg-no-repeat bg-cover
-                {/*bg-white*/}
                 bg-sidebar
             "
         >

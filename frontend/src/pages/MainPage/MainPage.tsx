@@ -39,7 +39,7 @@ const MainPage: React.FC = () => {
                         >
                             <Plus className=""/>Добавить видео</Button>
                     </EmptyView>)
-                    : <VideoTable data={data}/>
+                    : <div><VideoTable data={data}/></div>
             }
         </>
     );
