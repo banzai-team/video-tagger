@@ -10,6 +10,9 @@ downloads/
 # data/
 .idea
 
+<<<<<<< HEAD
 
 *id_ed25519
 *id_ed25519.pub
+=======
+>>>>>>> origin/ttt
