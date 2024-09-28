@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Routes } from "@/Router.tsx";
 import VideoTable from "@/pages/MainPage/components/VideoTable.tsx";
-import { useInferenceEndpointsServiceGetVideosV1VideosGet } from "@/openapi/queries";
+import { useInferenceEndpointsServiceGetVideosV1VideosGet } from "@/openapi/queries/queries";
 
 const MainPage: React.FC = () => {
   const navigate = useNavigate();

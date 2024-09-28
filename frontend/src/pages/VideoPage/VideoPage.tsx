@@ -5,7 +5,7 @@ import { Routes } from "@/Router.tsx";
 import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge.tsx";
 
-import { useInferenceEndpointsServiceGetVideoByIdV1VideosIdGet } from "@/openapi/queries";
+import { useInferenceEndpointsServiceGetVideoByIdV1VideosIdGet } from "@/openapi/queries/queries";
 
 const VideoPage: React.FC = () => {
   const { id = '' } = useParams();

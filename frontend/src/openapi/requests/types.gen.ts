@@ -11,7 +11,7 @@ export type HTTPValidationError = {
 };
 
 export type TaskOutput = {
-    task_id: string;
+    video_id: number;
 };
 
 export type ValidationError = {

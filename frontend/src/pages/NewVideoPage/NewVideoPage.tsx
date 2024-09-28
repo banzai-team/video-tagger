@@ -3,30 +3,28 @@ import AddVideoForm from "@/pages/NewVideoPage/components/AddVideoForm.tsx";
 import {
   useInferenceEndpointsServiceProcessVideoUrlV1ProcessVideoUrlPost,
   useInferenceEndpointsServiceProcessVideoFileV1ProcessVideoFilePost
-} from "@/openapi/queries";
+} from "@/openapi/queries/queries";
 import { useNavigate } from 'react-router-dom';
 import { Routes } from '@/Router';
 
 const NewVideoPage: React.FC = () => {
   const navigate = useNavigate()
 
-  // const redirectFunc = (data) => {
-  //   setTimeout(() => {
-  //     navigate(`${Routes.Video}/${data.id}`)
-  //   }, 1500)
-  // }
+  const redirectFunc = (data) => {
+    setTimeout(() => {
+      navigate(`${Routes.Video}/${data?.video_id}`)
+    }, 1500)
+  }
 
   const { mutate: mutateUrl } = useInferenceEndpointsServiceProcessVideoUrlV1ProcessVideoUrlPost({
     onSuccess: (data) => {
-      console.log({ data })
-      // redirectFunc(data)
+      redirectFunc(data)
     },
   });
 
   const { mutate: mutateFile } = useInferenceEndpointsServiceProcessVideoFileV1ProcessVideoFilePost({
     onSuccess: (data) => {
-      console.log({ data })
-      // redirectFunc(data)
+      redirectFunc(data)
     },
   });
 
