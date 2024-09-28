@@ -1,5 +1,6 @@
 .env
 .history
 .app_cache/
+data/submits/
 .idea
 downloads/
