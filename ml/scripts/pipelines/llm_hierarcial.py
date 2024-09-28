@@ -24,7 +24,7 @@ class VideoFeatures:
     video_id: str
     title: str
     description: str
-
+    text: str
 
 class VideoTagsPrediction(VideoFeatures):
     predicted_tags: list[str]

@@ -7,7 +7,7 @@ from app.logger import logger
 from app.db import engine
 from app.db import Base
 
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 
 
 from app.logger import logger
@@ -21,10 +21,5 @@ logger.info("router add succeed")
 
 
 @app.get("/health", tags=["System probs"])
-def health() -> int:
-    return status.HTTP_200_OK
-
-
-@app.get("/api/video/{id}", tags=["System probs"])
 def health() -> int:
     return status.HTTP_200_OK

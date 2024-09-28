@@ -16,11 +16,15 @@ ENV \
 WORKDIR /app
 
 COPY requirements.txt /app/requirements.txt
+COPY requirements.ml.txt /app/requirements.ml.txt
 
 RUN pip install -r /app/requirements.txt
+RUN pip install -r /app/requirements.ml.txt
 
 FROM base
 #
 ADD ./app ./app
+ADD ./ml_lib ./ml_lib
+ADD ./scripts ./scripts
 #
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]

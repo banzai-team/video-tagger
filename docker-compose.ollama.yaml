@@ -65,12 +65,8 @@ services:
 
   api:
     image: cr.yandex/crpmbkrui7s085cd545u/rutube-backend:latest
-    build: 
-      context: ./backend
-      dockerfile: Dockerfile
     command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
     volumes:
-      - ./backend:/app
       - ./downloads:/app/downloads
     labels:
       - "traefik.enable=true"
@@ -90,7 +86,7 @@ services:
       migrate:
         condition: service_completed_successfully
     restart: always
-  
+
   ml-data-uploader:
     image: curlimages/curl:latest
     command: >
@@ -108,42 +104,39 @@ services:
   ml-celery-worker:
     restart: always
     image: cr.yandex/crpmbkrui7s085cd545u/rutube-ml:latest
-    build: 
-      context: ./ml
-      dockerfile: Dockerfile
     command: celery -A app.celery_worker worker --loglevel=info
     volumes:
-      - ./ml/:/app
       - ./downloads/:/app/downloads
       - ./data/train_dataset_tag_video/:/app/data/train_dataset_tag_video
       - ./data/data_prep/:/app/data/data_prep
     depends_on:
+      ollama:
+        condition: service_started
       rabbitmq:
         condition: service_started
       db:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+      ml-data-uploader:
+        condition: service_completed_successfully
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
       - CELERY_RESULT_BACKEND=rpc://guest:guest@rabbitmq:5672//
-      - MODEL_NAME=hf
-      - HF_MODEL_NAME=unsloth/Llama-3.2-1B-Instruct
-      - OPENROUTER_MODEL_NAME=unsloth/Llama-3.2-1B-Instruct
+      - MODEL_NAME=openrouter
+      - HF_MODEL_NAME=llama3.2
       - FILE_PATH_PREDICT=data/train_dataset_tag_video/baseline/train_data_categories.csv
       - FILE_PATH_IAB=data/data_prep/filtered_taxonomy.csv
+      - OPENROUTER_MODEL_NAME=llama3.2
       - OPENROUTER_API_KEY=${OPENAPI_API_KEY}
+      - OPENROUTER_BASE_URL= http://ollama:11434
 
   api-celery_worker:
     restart: always
     image: cr.yandex/crpmbkrui7s085cd545u/rutube-backend:latest
-    build: 
-      context: ./backend
-      dockerfile: Dockerfile
     command: celery -A app.celery_worker worker --loglevel=info
     volumes:
-      - ./backend/:/app
       - ./downloads/:/app/downloads
     depends_on:
       rabbitmq:
@@ -156,7 +149,6 @@ services:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
       - CELERY_RESULT_BACKEND=rpc://guest:guest@rabbitmq:5672//
-
   
   rabbitmq:
     image: rabbitmq:3
@@ -164,3 +156,31 @@ services:
       - "5672:5672"
       - "15672:15672"
     restart: always
+  
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "7869:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - ollama_data:/root/.ollama
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    entrypoint: >
+      sh -c "
+        ollama serve &
+        sleep 10 &&
+        ollama run llama3.2 &
+        wait
+      "
+
+volumes:
+  postgres_data:
+  ollama_data:

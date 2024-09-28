@@ -19,7 +19,6 @@ services:
     restart: always
 
   frontend:
-    image: cr.yandex/crpmbkrui7s085cd545u/rutube-app:latest
     build: 
       context: ./frontend
       dockerfile: Dockerfile
@@ -51,7 +50,6 @@ services:
       retries: 5
 
   migrate:
-    image: cr.yandex/crpmbkrui7s085cd545u/rutube-backend:latest
     build: 
       context: ./backend
       dockerfile: Dockerfile
@@ -64,7 +62,6 @@ services:
         condition: service_healthy
 
   api:
-    image: cr.yandex/crpmbkrui7s085cd545u/rutube-backend:latest
     build: 
       context: ./backend
       dockerfile: Dockerfile
@@ -91,23 +88,8 @@ services:
         condition: service_completed_successfully
     restart: always
   
-  ml-data-uploader:
-    image: curlimages/curl:latest
-    command: >
-      /bin/sh -c "
-      mkdir -p /app/data/train_dataset_tag_video/baseline /app/data/data_prep &&
-      wget -O /app/data/train_dataset_tag_video/baseline/train_data_categories.csv https://storage.yandexcloud.net/rutube-ml/train_data_categories.csv &&
-      wget -O /app/data/data_prep/filtered_taxonomy.csv https://storage.yandexcloud.net/rutube-ml/filtered_taxonomy.csv &&
-      wget -O /app/data/train_dataset_tag_video/baseline/IAB_tags.csv https://storage.yandexcloud.net/rutube-ml/IAB_tags.csv &&
-      echo 'Data download complete'
-      "
-    volumes:
-      - ./data/train_dataset_tag_video/:/app/data/train_dataset_tag_video
-      - ./data/data_prep/:/app/data/data_prep
-
   ml-celery-worker:
     restart: always
-    image: cr.yandex/crpmbkrui7s085cd545u/rutube-ml:latest
     build: 
       context: ./ml
       dockerfile: Dockerfile
@@ -137,7 +119,6 @@ services:
 
   api-celery_worker:
     restart: always
-    image: cr.yandex/crpmbkrui7s085cd545u/rutube-backend:latest
     build: 
       context: ./backend
       dockerfile: Dockerfile
@@ -164,3 +145,4 @@ services:
       - "5672:5672"
       - "15672:15672"
     restart: always
+  # vllm:

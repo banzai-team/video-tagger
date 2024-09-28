@@ -15,10 +15,10 @@ from app.logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from app.db.engine import get_db
 from app.db.video import Video
+from ml_lib.audio.feature_extractor import FeatureExtractor
 from ml_lib.model_registry import load_model_hf, load_model_openrounter
 from ml_lib.utils import create_nested_structure, load_data
 from scripts.pipelines.llm_hierarcial import VideoFeatures, predict_video
-from ml_lib.audio.s2t import WhisperTranscriber
 from ml_lib.video.video_helper import extract_audio_from_video
 
 
@@ -73,6 +73,8 @@ nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str,
 
 logger.info("""Model initialized""")
 
+s2tModel = FeatureExtractor()
+
 
 @celery.task(bind=True)
 def process_video(self, input, **kwargs):
@@ -108,12 +110,24 @@ def extract_audio(self, input, **kwargs):
 def s2t(self, input, **kwargs):
     video_id = input["video_id"]
     audio_path = input["audio_path"]
-    s2tModel = WhisperTranscriber()
 
-    text = s2tModel.transcribe_audio(audio_path)
+    text = s2tModel.extract_features(audio_path)
     update_video(video_id=video_id, status="TEXT_EXTRACTED", text=text)
 
     return {"video_id": video_id, "text": text}
+
+
+# TODO: ЛЕША ДОБАВЬ, ТУТ process_video
+# @celery.task(bind=True)
+# def process_video_text(self, input, **kwargs):
+#     video_id = input["video_id"]
+#     audio_path = input["audio_path"]
+#     s2tModel = WhisperTranscriber()
+
+#     text = s2tModel.transcribe_audio(audio_path)
+#     update_video(video_id=video_id, status="TEXT_EXTRACTED", text=text)
+
+#     return {"video_id": video_id, "text": text}
 
 
 @celery.task(bind=True)
@@ -127,7 +141,7 @@ def process_video_text(self, input, **kwargs):
         lm,
         nested_taxonomy,
         VideoFeatures(
-            video_id=video_id, title=video.title, description=video.description
+            video_id=video_id, title=video.title, description=video.description, text=text
         ),
     )
     logger.info(f"Predicted tags for video: {video_id} {str(prediction)}")
