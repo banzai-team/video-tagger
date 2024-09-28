@@ -4,13 +4,30 @@ set -e
 set +x
 
 
+# submit file needed to be passed
+# PIPELINE_NAME="submit"
+# PIPELINE_NAME="baseline"
+PIPELINE_NAME="llm_hierarcial"
+
+
+DEBUG=${DEBUG:-false}
+PREDICT_ALL=${PREDICT_ALL:-false}
+
+# need big gpu
+# MODEL_TYPE="hf"
+HF_MODEL_NAME=unsloth/Llama-3.2-1B-Instruct
+
+
+# easy testing
+MODEL_TYPE="openrouter" # vllm variant too
+OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-none}  # vllm variant too
+OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1/}  # vllm variant too
+OPENROUTER_MODEL_NAME=meta-llama/llama-3.1-70b-instruct
+
 ROOT_DIR=$(dirname "$(readlink -f "$0")")/../
 source $ROOT_DIR/venv/bin/activate
 
 DATA_DIR=$ROOT_DIR/../data
-
-DEBUG=${DEBUG:-false}
-PREDICT=${PREDICT:-false}
 
 FULL_DATA_CSV_FILE=$DATA_DIR/train_dataset_tag_video/baseline/train_data_categories.csv
 
@@ -36,18 +53,14 @@ python3 $ROOT_DIR/scripts/split.py \
 TRAIN_DATA_CSV_FILE=$DATA_DIR/split/train.csv
 PREDICT_DATA_CSV_FILE=$DATA_DIR/split/val.csv
 
-# PIPELINE_NAME="submit"
-# PIPELINE_NAME="baseline"
-PIPELINE_NAME="llm_hierarcial"
-
 SUBMITION_FILE=${SUBMITION_FILE:-$DATA_DIR/submits/$PIPELINE_NAME/submission_$(date +"%Y-%m-%d_%H-%M-%S").csv}
 
+# test pipe
 if [ "$PIPELINE_NAME" == "baseline" ]; then
     python3 $ROOT_DIR/scripts/pipelines/baseline.py \
         --submission_file $SUBMITION_FILE \
         --file_path_train $PREDICT_DATA_CSV_FILE \
-        --file_path_iab $TAXONOMY_FILE \
-        --generate-random
+        --file_path_iab $TAXONOMY_FILE
 fi
 
 if [ "$PIPELINE_NAME" == "llm_hierarcial" ]; then
@@ -56,10 +69,11 @@ if [ "$PIPELINE_NAME" == "llm_hierarcial" ]; then
         --file_path_train $TRAIN_DATA_CSV_FILE \
         --file_path_predict $PREDICT_DATA_CSV_FILE \
         --file_path_iab $TAXONOMY_FILE \
-        --hf-model-name unsloth/Llama-3.2-1B-Instruct \
-        --model-type openrouter \
+        --hf-model-name $HF_MODEL_NAME \
+        --openrouter-model-name $OPENROUTER_MODEL_NAME \
+        --model-type $MODEL_TYPE \
         $([ "$DEBUG" == true ] && echo --debug) \
-        $([ "$PREDICT" == true ] && echo --predict-all) \
+        $([ "$PREDICT_ALL" == true ] && echo --predict-all) \
     ;
 fi
 
