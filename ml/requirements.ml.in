@@ -8,3 +8,6 @@ guidance
 bitsandbytes
 transformers
 accelerate
+# for openrouter
+openai
+sentencepiece

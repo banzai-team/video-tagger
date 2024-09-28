@@ -17,7 +17,8 @@ TAXONOMY_FILE=$DATA_DIR/train_dataset_tag_video/baseline/IAB_tags.csv
 
 # PIPELINE_NAME="baseline"
 PIPELINE_NAME="llm_hierarcial"
-SUBMITION_FILE=$DATA_DIR/submits/$PIPELINE_NAME/submission_$(date +"%Y-%m-%d_%H-%M-%S").csv
+
+SUBMITION_FILE=${SUBMITION_FILE:-$DATA_DIR/submits/$PIPELINE_NAME/submission_$(date +"%Y-%m-%d_%H-%M-%S").csv}
 
 if [ "$PIPELINE_NAME" == "baseline" ]; then
     PYTHONPATH=$ROOT_DIR python3 $ROOT_DIR/scripts/pipelines/baseline.py \
@@ -33,12 +34,19 @@ if [ "$PIPELINE_NAME" == "llm_hierarcial" ]; then
         --file_path_train $TRAIN_DATA_CSV_FILE \
         --file_path_iab $TAXONOMY_FILE \
         --hf-model-name unsloth/Llama-3.2-1B-Instruct \
+        --model-type openrouter \
         --predict-all
 fi
 
-# # save submission file structure
-# GROUD_TRUTH_FILE=$TRAIN_DATA_CSV_FILE
 
-# python3 $ROOT_DIR/scripts/eval.py \
-#     --submission $SUBMITION_FILE \
-#     --ground-truth $GROUD_TRUTH_FILE
+if [ -f "$SUBMITION_FILE" ]; then
+    # save submission file structure
+    GROUD_TRUTH_FILE=$TRAIN_DATA_CSV_FILE
+
+    python3 $ROOT_DIR/scripts/eval.py \
+        --submission $SUBMITION_FILE \
+        --ground-truth $GROUD_TRUTH_FILE
+else
+    echo "Submission file does not exist. Exiting."
+    exit 1
+fi
