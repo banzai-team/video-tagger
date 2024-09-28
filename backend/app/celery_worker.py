@@ -74,16 +74,16 @@ def download_video(self, url, base_path="downloads"):
         video_id = create_video(
             title, description=description, status="SUBMITTED", url=url
         )
-        file_path = base_path + f"/{video_id}/" + "video.mp4"
+        video_path = base_path + f"/{video_id}/" + "video.mp4"
         ydl_opts = {
             "format": "bestvideo+bestaudio/best",
-            "outtmpl": file_path,
+            "outtmpl": video_path,
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
 
-        update_video(video_id, status="DOWNLADED", file_path=file_path)
+        update_video(video_id, status="DOWNLADED", video_path=video_path)
     else:
         logger.error(f"Video with URL {url} was not found")
 
@@ -94,12 +94,12 @@ def download_video(self, url, base_path="downloads"):
 def upload_video(self, title, description, contents, base_path="downloads"):
     logger.debug(f"Uploading video file for {title}")
     video_id = create_video(title, description=description, status="SUBMITTED")
-    file_path = base_path + f"/{video_id}/video.mp4"
+    video_path = base_path + f"/{video_id}/video.mp4"
     os.makedirs(base_path + f"/{video_id}", exist_ok=True)
-    with open(file_path, "wb") as f:
+    with open(video_path, "wb") as f:
         f.write(contents)
 
-    update_video(video_id, status="DOWNLADED", file_path=file_path)
+    update_video(video_id, status="DOWNLADED", video_path=video_path)
 
     logger.info("Uploaded video")
     return {"video_id": video_id}

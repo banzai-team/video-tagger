@@ -33,9 +33,14 @@ class VideoRepr(BaseModel):
     id: int
     status: str
     title: str
-    description: str
+    description: str | None = None
     url: str | None = None
     file_path: str | None = None
+    tags: str | None = None
+    video_path: str | None = None
+    text: str | None = None
+    audio_path: str | None = None
+    url: str | None = None
 
 
 @router.post(
@@ -88,16 +93,10 @@ async def process_video_file(
 )
 def get_video_by_id(id):
     db = next(get_db())
-    item = db.query(Video).filter(Video.id == id).first()
-    if item is None:
+    video = db.query(Video).filter(Video.id == id).first()
+    if video is None:
         return JSONResponse({}, status_code=status.HTTP_404_NOT_FOUND)
-    return VideoRepr(
-        id=item.id,
-        status=item.status,
-        title=item.title,
-        description=item.description,
-        file_path=item.file_path,
-    )
+    return video_to_repr(video)
 
 
 @router.get(
@@ -110,22 +109,18 @@ def get_video_by_id(id):
 def get_videos(skip=0, size=10) -> int:
     db = next(get_db())
     res = db.query(Video).limit(size).offset(skip)
-    return [
-        VideoRepr(
-            id=item.id,
-            status=item.status,
-            title=item.title,
-            description=item.description,
-            file_path=item.file_path,
-        )
-        for item in res
-    ]
+    return [video_to_repr(item) for item in res]
 
 
-def video_to_(video):
-    return {
-        "id": video.id,
-        "title": video.title,
-        "description": video.description,
-        "status": video.status,
-    }
+def video_to_repr(video):
+    return VideoRepr(
+        id=video.id,
+        status=video.status,
+        title=video.title,
+        description=video.description,
+        video_path=video.video_path,
+        audio_path=video.audio_path,
+        text=video.text,
+        tags=video.tags,
+        url=video.url,
+    )
