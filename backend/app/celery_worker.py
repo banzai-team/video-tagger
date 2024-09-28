@@ -19,8 +19,12 @@ celery = Celery(
     broker_url=CELERY_BROKER_URL,
     task_queues=[
         Queue("video_upload_queue", routing_key="video_upload_queue"),
+        Queue("video_download_queue", routing_key="video_download_queue"),
     ],
-    task_routes={"app.celery_worker.upload_video": {"queue": "video_upload_queue"}},
+    task_routes={
+        "app.celery_worker.upload_video": {"queue": "video_upload_queue"},
+        "app.celery_worker.download_video": {"queue": "video_download_queue"},
+    },
 )
 
 celery.conf.update(
@@ -32,7 +36,7 @@ celery.conf.update(
 def process_video_tags_for_url(url):
     return chain(
         signature(
-            "app.celery_worker.upload_video",
+            "app.celery_worker.download_video",
             kwargs={"url": url},
             queue="video_upload_queue",
         ),
