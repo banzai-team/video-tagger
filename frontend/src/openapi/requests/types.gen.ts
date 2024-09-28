@@ -24,9 +24,13 @@ export type VideoRepr = {
     id: number;
     status: string;
     title: string;
-    description: string;
+    description: string | null;
     url: string | null;
     file_path: string | null;
+    tags: string | null;
+    video_path: string | null;
+    text: string | null;
+    audio_path: string | null;
 };
 
 export type VideoUrlInput = {

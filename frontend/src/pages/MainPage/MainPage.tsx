@@ -4,31 +4,12 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Routes } from "@/Router.tsx";
 import VideoTable from "@/pages/MainPage/components/VideoTable.tsx";
-import { useInferenceEndpointsServiceGetVideosV1VideosGet } from "@/openapi/queries/queries";
-
-export type VideoDataItem = {
-  id: string;
-  name: string;
-  tags: string[];
-  source: string;
-};
+import { useInferenceEndpointsServiceGetVideosV1VideosGet } from "@/openapi/queries";
 
 const MainPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data: videos } = useInferenceEndpointsServiceGetVideosV1VideosGet();
-
-  const data: VideoDataItem[] = [{
-    id: '0',
-    name: "test",
-    tags: ["test1", "test 2", "test 3", "test 4"],
-    source: 'https://rutube.ru/video/c6cc4d620b1d4338901770a44b3e82f4/'
-  }, {
-    id: '1',
-    name: "Cats cats video",
-    tags: ["cats", "happy", "love"],
-    source: 'https://rutube.ru/'
-  }];
+  const { data } = useInferenceEndpointsServiceGetVideosV1VideosGet();
 
   return (
     <>

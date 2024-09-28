@@ -92,7 +92,14 @@ export const $VideoRepr = {
             title: 'Title'
         },
         description: {
-            type: 'string',
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Description'
         },
         url: {
@@ -116,10 +123,54 @@ export const $VideoRepr = {
                 }
             ],
             title: 'File Path'
+        },
+        tags: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tags'
+        },
+        video_path: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Video Path'
+        },
+        text: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Text'
+        },
+        audio_path: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Audio Path'
         }
     },
     type: 'object',
-    required: ['id', 'status', 'title', 'description', 'url', 'file_path'],
+    required: ['id', 'status', 'title', 'description', 'url', 'file_path', 'tags', 'video_path', 'text', 'audio_path'],
     title: 'VideoRepr'
 } as const;
 

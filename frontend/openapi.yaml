@@ -204,7 +204,9 @@ components:
           type: string
           title: Title
         description:
-          type: string
+          anyOf:
+            - type: string
+            - type: 'null'
           title: Description
         url:
           anyOf:
@@ -216,6 +218,26 @@ components:
             - type: string
             - type: 'null'
           title: File Path
+        tags:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Tags
+        video_path:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Video Path
+        text:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Text
+        audio_path:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Audio Path
       type: object
       required:
         - id
@@ -224,6 +246,10 @@ components:
         - description
         - url
         - file_path
+        - tags
+        - video_path
+        - text
+        - audio_path
       title: VideoRepr
     VideoUrlInput:
       properties:
