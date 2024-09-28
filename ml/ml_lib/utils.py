@@ -12,6 +12,7 @@ def load_data(file_path_train, file_path_iab, cols=("video_id", "title", "descri
     print(f"Taxonomy columns: {taxonomy.columns.tolist()}")
     return data, taxonomy
 
+
 def create_nested_structure(df):
     level_one = {}
 

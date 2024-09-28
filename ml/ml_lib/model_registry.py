@@ -35,14 +35,14 @@ def load_model_openrounter(model_name, tokenizer="neuralmagic/Meta-Llama-3.1-70B
     from transformers import AutoTokenizer
     
     from guidance.models.transformers._transformers import TransformersTokenizer
-
+    from guidance.chat import Llama3ChatTemplate
     tokenizer = AutoTokenizer.from_pretrained(
                                    tokenizer, 
                                    use_fast=False, legacy=True
                                 )
-    tt = TransformersTokenizer(model_name, tokenizer, chat_template='llama3', ignore_bos_token=True)
+    tt = TransformersTokenizer(model_name, tokenizer, ignore_bos_token=True)
     return models.OpenAI(model_name, echo=False, 
                                api_key=os.environ['OPENROUTER_API_KEY'],
-                               base_url='https://openrouter.ai/api/v1/',
+                               base_url=os.getenv('OPENROUTER_BASE_URL', default='https://openrouter.ai/api/v1/'),
                                tokenizer = tt,
                                **model_kwargs)

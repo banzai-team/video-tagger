@@ -4,13 +4,19 @@ from tqdm import tqdm
 import pathlib
 import pandas as pd
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
-from guidance import system, user, assistant, select, at_most_n_repeats, zero_or_more
+from guidance.models._model import ConstraintException
+from guidance import system, user, assistant, select, zero_or_more, with_temperature
+from llama_index.core.indices import VectorStoreIndex
+from llama_index.core.vector_stores import MetadataFilters, MetadataFilter, FilterOperator
+
 
 from ml_lib.utils import load_data, create_nested_structure
 from ml_lib.model_registry import load_model_hf, load_model_openrounter
+from ml_lib.few_shot_rag import build_few_shot_index, make_retrieve_prompt, make_view_name_from_tags, join_tag_with_subtags
+
+from typing import Optional
 
 
 @dataclass
@@ -45,9 +51,11 @@ def make_categories(categories: list[_LevelCat], all_good_cat=True, wrong_cat=Fa
     return p, all_good_cat_idx, wrong_cat_idx
 
 
-def make_few_shot(video_features):
+def make_few_shot(video_features, tags_idx=None):
     vf = video_features
     return f"""\
+Информация о видео:
+===
 Название:
 ---
 {vf.title}
@@ -57,21 +65,40 @@ def make_few_shot(video_features):
 ---
 {vf.description}
 ---
-"""
+===
+
+""" + (f"""\
+Выбранные номера категорий: {', '.join(map(lambda x: str(x+1), tags_idx))}
+""" if tags_idx is not None else "")
 
 
 def remove_empty_lists(input_list):
     return [item for item in input_list if item != []]
 
 
+def find_indices(list1, list2):
+    indices = []
+    element_to_indices = {element: index for index, element in enumerate(list2)}
+    
+    for element in list1:
+        if element in element_to_indices:  # Проверяем, есть ли элемент в словаре.
+            indices.append(element_to_indices[element])
+    
+    return indices
+
+
 def predict_video(
     lm, 
     nested_taxonomy: dict[str, dict[str, list]], 
     video_features: VideoFeatures, 
-    max_cats_at_time=3, 
+    max_cats_at_time=2, 
     max_predict_level=3,
     debug=False,
-    verbose=True
+    verbose=True,
+    few_shot_index: Optional[VectorStoreIndex]=None,
+    max_few_shots=3,
+    # todo: later
+    similarity_top_k=7,
 ) -> VideoTagsPrediction:
     verbose = verbose or debug
     vf = video_features
@@ -103,86 +130,147 @@ def predict_video(
                 categories, 
                 all_good_cat=all_good_cat, 
                 wrong_cat=wrong_cat
-                )
-            try:
-                lm_ = lm
-                with user():
-                    lm_ += (
-                        'Тебе нужно выбрать какие категории и подкатегории (хотя бы одна) из списка подходят для видео на видеохостинге. '
-                        'Ниже список категорий:\n'
-                        f'{prompt_cat}\n\n'
-                        # todo: make few shots
-                        #####
-                        'Вот информация по видео на видеохостинге:\n'
-                        '===\n'
-                        f'{make_few_shot(vf)}\n'
-                        '===\n\n'
-                        # f"{'Обрати внимание, что категорий может быть несколько! ' if level>0 else ''}"
-                        'Обрати внимание, что категорий может быть несколько! '
-                        # f"{'Не стейсняйся выбирать до трех категорий за раз - у тебя есть возможность отказаться от неподходящей через опцию. ' if wrong_cat else ''}"
-                        "Но это не значит, что можно выбирать теги невнимательно!\n"
-                        f"{'Если ничего или большинство подходит - выбери соответствующую опцию. ' if all_good_cat else ''}"
-                        'Ответ СРАЗУ начинай с номеров подходящих категорий через запятую:'
-                    ).strip()
-
-                choose_cats = list(range(len(categories)))
-                if all_good_cat_idx is not None:
-                    choose_cats += [all_good_cat_idx]
-                if wrong_cat_idx is not None:
-                    choose_cats += [wrong_cat_idx]
-                
-                with assistant():
-                    # starts from 1
-                    p = select(
-                        [str(i+1) for i in choose_cats], list_append=True, name="pred_cats"
+            )
+            
+            few_shot_prompts = []
+            if few_shot_index is not None:
+                filters = None
+                if level > 0:
+                    filters = MetadataFilters(
+                        filters=[
+                            MetadataFilter(
+                                key='expand_tags',
+                                value=join_tag_with_subtags(
+                                    categories[0].view_name.split(' -> ')[:-1]
+                                ),
+                                operator=FilterOperator.CONTAINS
+                            )
+                        ]
                     )
-                    # lm_ += at_most_n_repeats(p + ", ", n_repeats=max_cats_at_time - 1) + p
-                    lm_ += zero_or_more(p + ", ") + p
+                    print(f"{filters=}")
 
-                if verbose:
-                    print(lm_)
-                # Parse answer
-                # level 1
-                if pred_i == -1:
-                    for pred_cat_idx in set(lm_["pred_cats"]):
-                        pred_cat_idx_ = pred_cat_idx[:-1] if "," in pred_cat_idx else pred_cat_idx
-                        pred_tag = categories[int(pred_cat_idx_) - 1].taxonomy_name
-                        predicted_tags.append([pred_tag])
-                else:
-                    tmp = []
-                    set_pred_cats = set(lm_["pred_cats"])
-                        # start from = 1
-                    set_pred_cats = [int(t[:-1] if "," in t else t)-1 for t in set_pred_cats]
-                    print(f"{set_pred_cats=}")
+                few_shot_retriever = few_shot_index.as_retriever(
+                    similarity_top_k=similarity_top_k,
+                    filters=filters
+                )
+                few_shots = few_shot_retriever.retrieve(
+                    make_retrieve_prompt(
+                        vf.title, vf.description
+                    )
+                )
+                # print(few_shots)
+                for i, shot_node_with_score in enumerate(few_shots):
+                    shot = shot_node_with_score.node
+                    few_shot_tags_view_names = make_view_name_from_tags(shot.metadata['tags'], level+1)
+                    list2lookup_tags = [c.view_name for c in categories]
+                    # print(f"{i=} {few_shot_tags_view_names=}")
+                    tag_idxs = find_indices(few_shot_tags_view_names, list2lookup_tags)
+                    if len(tag_idxs) != 0:
+                        few_shot_prompts += [make_few_shot(VideoFeatures(
+                            video_id=shot.metadata['video_id'],
+                            title=shot.metadata['Название видео'],
+                            description=shot.text,
+                        ), tags_idx=tag_idxs)]
+                few_shot_prompts = few_shot_prompts[:max_few_shots] 
+                
+            few_shot_prompt = (
+                "\nНиже несколько примеров как проставлются категории для похожих видео. " + 
+                "Обрати внимание на количество категорий!" + 
+                "\n=====\n" +
+                "\n--\n".join(few_shot_prompts) + 
+                "\n=====\n\n" +
+                "А теперь реальный пример. "
+            ) if len(few_shot_prompts) > 0 else ""
+            
+            retry_cnt = 3
+            retry = True
+            while retry and retry_cnt > 0:
+                try:
+                    lm_ = lm
+                    with user():
+                        lm_ += (
+                            'Тебе нужно выбрать какие категории и подкатегории из списка подходят для видео на видеохостинге. '
+                            'Ниже список категорий:\n'
+                            f'{prompt_cat}\n\n'
+                            # todo: make few shots
+                            #####
+                            f"{'Обрати внимание, что категорий может быть несколько (НЕ более двух)! ' if level==0 else ''}"
+                            f"{'Это НЕ значит, что категории всегда должно быть две. ' if level==0 else ''}"
+                            f"{'Если ты сомневаешься в количестве, обрати внимание на количество категорий у приведенных примеров. ' if len(few_shot_prompt)!=0 else ''}"
+                            f"{'Обрати внимание, что категория может быть ТОЛЬКО одна! ' if level>0 else ''}"
+                            f"{'Если ничего или большинство подходит - выбери соответствующую опцию. ' if all_good_cat else ''}"
+                            'Ответ СРАЗУ начинай с номеров подходящих категорий через запятую, номера разделяй пробелом.\n'
+                            f'{few_shot_prompt}\n'
+                            f'{make_few_shot(vf)}\n'
+                            'Твой ответ:'
+                        ).strip()
+
+                    choose_cats = list(range(len(categories)))
+                    if all_good_cat_idx is not None:
+                        choose_cats += [all_good_cat_idx]
+                    if wrong_cat_idx is not None:
+                        choose_cats += [wrong_cat_idx]
                     
-                    #  todo: <eot_id> generate
-                    if all_good_cat_idx in set_pred_cats:
-                        tmp.append(predicted_tags[pred_i])
-                    elif wrong_cat_idx in set_pred_cats:
-                        ...
+                    with assistant():
+                        # starts from 1
+                        p = select(
+                            [str(i+1) for i in choose_cats], list_append=True, name="pred_cats",
+                        )
+                        lm_ += with_temperature(
+                            zero_or_more(p + select([", ", ","])) + p + select(["<|eot_id|>", ""]), 
+                            # чтобы ретрай не отдавал нам то же самое
+                            0 + retry_cnt*0.01
+                        )
+
+                    if verbose:
+                        print(lm_)
+                    # Parse answer
+                    # level 1
+                    if pred_i == -1:
+                        for pred_cat_idx in set(lm_["pred_cats"]):
+                            pred_cat_idx_ = pred_cat_idx[:-1] if "," in pred_cat_idx else pred_cat_idx
+                            pred_tag = categories[int(pred_cat_idx_) - 1].taxonomy_name
+                            predicted_tags.append([pred_tag])
                     else:
-                        # если ллм выбрала много категорий - стопаем ее
-                        if len(set_pred_cats) <= max_cats_at_time:
-                            for choose_cat_id in set_pred_cats:
-                                pred_tag = categories[choose_cat_id].taxonomy_name
-                                tmp.append(predicted_tags[pred_i] + [pred_tag])
-                            predicted_tags[pred_i] = []
-                            predicted_tags += tmp
-                if verbose:
-                    print(f"{predicted_tags=}")
-            except Exception as e:
-                if debug:
+                        tmp = []
+                        set_pred_cats = set(lm_["pred_cats"])
+                            # start from = 1
+                        set_pred_cats = [int(t[:-1] if "," in t else t)-1 for t in set_pred_cats]
+                        print(f"{set_pred_cats=}")
+                        
+                        #  todo: <eot_id> generate
+                        if all_good_cat_idx in set_pred_cats:
+                            tmp.append(predicted_tags[pred_i])
+                        elif wrong_cat_idx in set_pred_cats:
+                            ...
+                        else:
+                            # если ллм выбрала много категорий - стопаем ее
+                            if len(set_pred_cats) <= max_cats_at_time:
+                                for choose_cat_id in set_pred_cats:
+                                    pred_tag = categories[choose_cat_id].taxonomy_name
+                                    tmp.append(predicted_tags[pred_i] + [pred_tag])
+                                predicted_tags[pred_i] = []
+                                predicted_tags += tmp
+                    if verbose:
+                        print(f"{predicted_tags=}")
+                    retry = False
+                except ConstraintException:
+                    retry = True
+                except Exception as e:
+                    retry = False
+                    if debug:
+                        print(
+                            f"{vf.video_id=}",
+                            f"{vf.title=}",
+                        )
+                        raise e
+
                     print(
                         f"{vf.video_id=}",
                         f"{vf.title=}",
+                        f"{e =}",
                     )
-                    raise e
-
-                print(
-                    f"{vf.video_id=}",
-                    f"{vf.title=}",
-                    f"{e =}",
-                )
+                retry_cnt -= 1
 
         predicted_tags = remove_empty_lists(predicted_tags)
         level += 1
@@ -197,10 +285,15 @@ def predict_video(
 
 
 def main(args):
+    few_shot_index = build_few_shot_index(
+        train_filepath_csv=args.file_path_train,
+        model_name=args.few_shot_retriever_model,
+        
+    )
+    
     # predict mode only
     data, taxonomy = load_data(file_path_train=args.file_path_predict, file_path_iab=args.file_path_iab)
     nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
-    
     if args.model_type == 'hf':
         lm = load_model_hf(args.hf_model_name)
     elif args.model_type == 'openrouter':
@@ -210,45 +303,38 @@ def main(args):
     with system():
         lm += "Ты большой эксперт в определении тематик видео по передаваеным тебе признакам. "
 
-    print("===" * 4)
-    print("prediction example")
-    print("===" * 2)
-
-    if not args.predict_all:
-        for _, row in data.head(10).iterrows():
+    results = []
+    try:
+        if not args.predict_all:
+            print("===" * 4)
+            print("prediction example")
+            print("===" * 2)
+        for _, row in tqdm(data.iterrows(), total=data.shape[0]):
             prediction = predict_video(
                 lm,
                 nested_taxonomy,
-                VideoFeatures(video_id=row["video_id"], title=row["title"], description=row["description"]),
-                debug=args.debug
+                VideoFeatures(
+                    video_id=row["video_id"], title=row["title"], 
+                    description=row["description"]
+                ),
+                verbose=True,
+                few_shot_index=few_shot_index,
             )
-
-            print("SAMPLE id", row["video_id"])
-            print("SAMPLE title", row["title"])
-            print("PREDICTION", prediction["predicted_tags"])
-            print("\n")
-        print("===" * 4)
-
-    else:
-        num_threads = 10  # Or set this to an appropriate number of threads
-        results = []
-        for _, row in tqdm(data.iterrows(), total=data.shape[0]):
             results.append(
-                predict_video(
-                    lm,
-                    nested_taxonomy,
-                    VideoFeatures(
-                        video_id=row["video_id"], title=row["title"], 
-                        description=row["description"]
-                    ),
-                    verbose=True,
-                )
+                prediction
             )
+            if not args.predict_all:
+                print("SAMPLE id", row["video_id"])
+                print("SAMPLE title", row["title"])
+                print("PREDICTION", prediction["predicted_tags"])
 
-        sample_submission = pd.DataFrame(results)
-        submission_file_dir = pathlib.Path(args.submission_file).parent
-        submission_file_dir.mkdir(parents=True, exist_ok=True)
-        sample_submission.to_csv(args.submission_file, index=False)
+    except KeyboardInterrupt as e:
+        print('stop calc')
+
+    sample_submission = pd.DataFrame(results)
+    submission_file_dir = pathlib.Path(args.submission_file).parent
+    submission_file_dir.mkdir(parents=True, exist_ok=True)
+    sample_submission.to_csv(args.submission_file, index=False)
 
 
 if __name__ == "__main__":
@@ -266,10 +352,17 @@ if __name__ == "__main__":
 
     # NousResearch/Hermes-3-Llama-3.2-3B
     
+    # few shot embedder
+    parser.add_argument("--few_shot_retriever_model", default="intfloat/multilingual-e5-large")
+    parser.add_argument("--few_shot_retriever_top_k", default=5)
+    
+    
+    # llm
     parser.add_argument("--model-type", type=str, default="hf")
     parser.add_argument("--openrouter-model-name", type=str, default="meta-llama/llama-3.1-70b-instruct")
-    
     parser.add_argument("--hf-model-name", type=str, default="unsloth/Llama-3.2-1B-Instruct")
+    
+    
     parser.add_argument("--predict-all", action="store_true", default=False)
     parser.add_argument("--debug", action="store_true", default=False)
 
