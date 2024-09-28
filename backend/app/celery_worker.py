@@ -36,8 +36,18 @@ def process_video_tags_for_file(title, file):
 def download_video(self, url, base_path="./downloads"):
     logger.debug(f"Running download video job for {url}")
     pls = f"https://rutube.ru/api/play/options/{extract_rutube_id(url)}/?no_404=true&referer=https%3A%2F%2Frutube.ru"
-    resp = requests.get(pls)
+    db = next(get_db())
+    try:
+        db.add(Video(title=title, status="SUBMITTED", url=url))
+        db.commit()
+    except SQLAlchemyError as e:
+        logger.error(f"Error inserting video: {str(e)}")
+        db.rollback()  # Откат изменений в случае ошибки
+        raise Exception("Unable to persist video")
+    finally:
+        db.close()  # Закрытие сессии
 
+    resp = requests.get(pls)
     if resp.status_code == 200:
         data = resp.json()
         logger.info(data)
@@ -70,6 +80,18 @@ def download_video(self, url, base_path="./downloads"):
 @celery.task(bind=True)
 def upload_video(self, title, contents, base_path="./downloads"):
     logger.debug(f"Uploading video file for {title}")
+
+    db = next(get_db())
+    try:
+        db.add(Video(title=title, status="SUBMITTED"))
+        db.commit()
+    except SQLAlchemyError as e:
+        logger.error(f"Error inserting video: {str(e)}")
+        db.rollback()  # Откат изменений в случае ошибки
+        raise Exception("Unable to persist video")
+    finally:
+        db.close()  # Закрытие сессии
+
     file_id = uuid.uuid4()
     file_path = base_path + f"/{file_id}/video.mp4"
     os.makedirs(base_path + f"/{file_id}", exist_ok=True)
