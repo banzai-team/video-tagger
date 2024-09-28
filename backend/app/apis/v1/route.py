@@ -96,6 +96,7 @@ def get_video_by_id(id):
         status=item.status,
         title=item.title,
         description=item.description,
+        file_path=item.file_path,
     )
 
 
@@ -115,6 +116,7 @@ def get_videos(skip=0, size=10) -> int:
             status=item.status,
             title=item.title,
             description=item.description,
+            file_path=item.file_path,
         )
         for item in res
     ]

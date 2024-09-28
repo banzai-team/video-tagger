@@ -64,7 +64,7 @@ def process_video_tags_for_file(title, description, contents):
 
 
 @celery.task(bind=True)
-def download_video(self, url, base_path="./downloads"):
+def download_video(self, url, base_path="downloads"):
     logger.debug(f"Running download video job for {url}")
     pls = f"https://rutube.ru/api/play/options/{extract_rutube_id(url)}/?no_404=true&referer=https%3A%2F%2Frutube.ru"
 
@@ -92,7 +92,7 @@ def download_video(self, url, base_path="./downloads"):
 
 
 @celery.task(bind=True)
-def upload_video(self, title, description, contents, base_path="./downloads"):
+def upload_video(self, title, description, contents, base_path="downloads"):
     logger.debug(f"Uploading video file for {title}")
     video_id = create_video(title, description=description, status="SUBMITTED")
     file_path = base_path + f"/{video_id}/video.mp4"
