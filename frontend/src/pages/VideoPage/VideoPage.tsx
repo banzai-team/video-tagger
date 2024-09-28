@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import { Routes } from "@/Router.tsx";
 import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge.tsx";
-
+import { Spinner } from '@/components/ui/spinner';
 import { useInferenceEndpointsServiceGetVideoByIdV1VideosIdGet } from "@/openapi/queries/queries";
+import { InferenceEndpointsService } from "@/openapi/requests/services.gen";
+import { useQuery } from "@tanstack/react-query";
 
 const VideoPage: React.FC = () => {
   const { id = '' } = useParams();
 
-  const { data } = useInferenceEndpointsServiceGetVideoByIdV1VideosIdGet({ id });
+  const { data } = useQuery({
+    queryKey: [useInferenceEndpointsServiceGetVideoByIdV1VideosIdGet],
+    queryFn: () => InferenceEndpointsService.getVideoByIdV1VideosIdGet({ id }),
+    // refetchInterval: 3000,
+    refetchInterval: data => !data?.state?.data?.video_path ? 3000 : false,
+  });
 
   const tags = data?.tags ? JSON.parse(data?.tags) : []
 
@@ -22,11 +29,10 @@ const VideoPage: React.FC = () => {
       >
         <ArrowLeft className="h-3 w-3" />вернуться на главную
       </Link>
-      {/*todo: name of video instead ?*/}
       <h2 className="mb-5">{data?.title}</h2>
       <div className="grid grid-cols-1 gap-2 md:gap-4 md:grid-cols-2">
         {/*TODO: fix video size. Link or video file??? Check on correct data*/}
-        <iframe
+        {!data?.video_path ? <Spinner className='text-muted' /> : <iframe
           className="w-full h-96"
           src={`http://api.localhost/${data?.video_path}`}
           frameBorder="0"
@@ -34,7 +40,7 @@ const VideoPage: React.FC = () => {
         // webkitAllowFullScreen
         // mozallowfullscreen
         // allowFullScreen
-        />
+        />}
         <div>
           <div className="flex gap-3 flex-wrap max-h-max">
             {

@@ -9,7 +9,7 @@ import { useInferenceEndpointsServiceGetVideosV1VideosGet } from "@/openapi/quer
 const MainPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data } = useInferenceEndpointsServiceGetVideosV1VideosGet();
+  const { data } = useInferenceEndpointsServiceGetVideosV1VideosGet({ size: 100 });
 
   return (
     <>
