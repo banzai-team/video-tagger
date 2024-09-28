@@ -3,6 +3,7 @@ from fastapi import FastAPI, status, File, Form, UploadFile
 from app.apis import v1_router
 from app.logger import logger
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 # Create database tables
 # video.Base.metadata.create_all(bind=engine)
@@ -23,6 +24,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.mount("/downloads", StaticFiles(directory="downloads"), name="downloads")
 
 
 @app.get("/health", tags=["System probs"])
