@@ -15,7 +15,7 @@ def download_video_from_url(url, output_path="./data/downloaded_video.mp4"):
     return output_path
 
 
-def extract_audio_from_video(video_path, output_path="./data/test.wav"):
+def extract_audio_from_video(video_path, output_path):
     # Check if the video file exists
     if not os.path.exists(video_path):
         print(f"Error: Video file '{video_path}' not found.")

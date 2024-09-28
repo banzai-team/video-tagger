@@ -1,4 +1,5 @@
 .env
+.venv
 .history
 .app_cache/
 data/**/videos/
@@ -10,9 +11,16 @@ downloads/
 # data/
 .idea
 
-<<<<<<< HEAD
 
 *id_ed25519
 *id_ed25519.pub
-=======
->>>>>>> origin/ttt
+
+data/tokenizer_all_sets
+data/rnnt_model_config.yaml 
+data/rnnt_model_weights.ckpt 
+data/ssl_model_weights.ckpt
+data/ctc_model_config.yaml 
+data/ctc_model_weights.ckpt 
+data/emo_model_config.yaml 
+data/emo_model_weights.ckpt 
+data/encoder_config.yaml 
