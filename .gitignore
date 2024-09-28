@@ -1,6 +1,12 @@
 .env
 .history
 .app_cache/
+<<<<<<< HEAD
+=======
+data/**/videos/
+data/**/.DS_Store
+data/**/*.ipynb
+>>>>>>> 8fc410e8b9412fc273db7a0c582589599fc60f84
 data/submits/
 .idea
 downloads/
