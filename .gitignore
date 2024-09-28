@@ -1,6 +1,9 @@
 .env
 .history
 .app_cache/
-data/
+data/**/videos/
+data/**/.DS_Store
+data/**/*.ipynb
+data/submits/
 .idea
 downloads/
