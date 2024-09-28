@@ -11,3 +11,5 @@ accelerate
 # for openrouter
 openai
 sentencepiece
+llama-index-core
+llama-index-embeddings-huggingface

@@ -68,6 +68,8 @@ def find_iou_for_sample_submission(pred_submission, true_submission):
     
     error_analysis = {}
     for i, row in ground_truth_df.iterrows():
+        if i >= pred_submission.shape[0]:
+            break
         predicted_tags = predictions_df[predictions_df["video_id"]==row["video_id"]]["predicted_tags_split"].values[0]
         if len(predicted_tags) == 0:
             empty_preds += 1
@@ -115,7 +117,7 @@ def main(args):
     error_analysis
     print("top 5 mistakes: ", list(sorted(error_analysis.items(), key=lambda x: x[-1])[:5]))
 
-∆
+
 if __name__ == '__main__':
     import argparse
 
