@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ProcessVideoUrlV1ProcessVideoUrlPostData, ProcessVideoUrlV1ProcessVideoUrlPostResponse, ProcessVideoFileV1ProcessVideoFilePostData, ProcessVideoFileV1ProcessVideoFilePostResponse, ListVideosV1ListVideosGetResponse, HealthHealthGetResponse } from './types.gen';
+import type { ProcessVideoUrlV1ProcessVideoUrlPostData, ProcessVideoUrlV1ProcessVideoUrlPostResponse, ProcessVideoFileV1ProcessVideoFilePostData, ProcessVideoFileV1ProcessVideoFilePostResponse, GetVideoByIdV1VideosIdGetData, GetVideoByIdV1VideosIdGetResponse, GetVideosV1VideosGetData, GetVideosV1VideosGetResponse, HealthHealthGetResponse } from './types.gen';
 
 export class InferenceEndpointsService {
     /**
@@ -46,19 +46,47 @@ export class InferenceEndpointsService {
         });
     }
     
-}
-
-export class VideoManagementService {
     /**
-     * List Videos
-     * Получить список всех видео
-     * @returns VideoInfo Successful Response
+     * Get Video By Id
+     * Получает видео по идентфиикатору
+     * @param data The data for the request.
+     * @param data.id
+     * @returns VideoRepr Successful Response
      * @throws ApiError
      */
-    public static listVideosV1ListVideosGet(): CancelablePromise<ListVideosV1ListVideosGetResponse> {
+    public static getVideoByIdV1VideosIdGet(data: GetVideoByIdV1VideosIdGetData): CancelablePromise<GetVideoByIdV1VideosIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/v1/list_videos'
+            url: '/v1/videos/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Videos
+     * Получает список видео
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.size
+     * @returns VideoRepr Successful Response
+     * @throws ApiError
+     */
+    public static getVideosV1VideosGet(data: GetVideosV1VideosGetData = {}): CancelablePromise<GetVideosV1VideosGetResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/videos',
+            query: {
+                skip: data.skip,
+                size: data.size
+            },
+            errors: {
+                422: 'Validation Error'
+            }
         });
     }
     
