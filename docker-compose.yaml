@@ -46,7 +46,7 @@ services:
 
   migrate:
     build: 
-      context: ./ml
+      context: ./backend
       dockerfile: Dockerfile
     command: alembic upgrade head
     environment:
@@ -56,11 +56,11 @@ services:
 
   api:
     build: 
-      context: ./ml
+      context: ./backend
       dockerfile: Dockerfile
     command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
     volumes:
-      - ./ml:/app
+      - ./backend:/app
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api.${HOST}`)"
@@ -75,8 +75,9 @@ services:
       - db
       - rabbitmq
       - migrate
-
-  celery_worker:
+    restart: always
+  
+  ml-celery-worker:
     restart: always
     build: 
       context: ./ml
@@ -93,6 +94,24 @@ services:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
       - CELERY_RESULT_BACKEND=rpc://guest:guest@rabbitmq:5672//
 
+  api-celery_worker:
+    restart: always
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A app.celery_worker worker --loglevel=info
+    volumes:
+      - ./backend/:/app
+    depends_on:
+      - rabbitmq
+      - db
+      - migrate
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=rpc://guest:guest@rabbitmq:5672//
+
+  
   rabbitmq:
     image: rabbitmq:3
     ports:

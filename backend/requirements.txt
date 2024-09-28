@@ -1,0 +1,17 @@
+anyio==3.7.1
+fastapi==0.103.1
+pydantic==2.3.0
+python-multipart==0.0.6
+starlette==0.27.0
+SQLAlchemy==2.0.21
+celery==5.3.1
+uvicorn==0.23.2
+alembic==1.13.3
+# core requirements
+numpy==1.26.0
+requests==2.31.0
+numpy
+yt_dlp
+
+#
+psycopg2-binary==2.9.9
