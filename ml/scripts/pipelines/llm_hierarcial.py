@@ -202,7 +202,7 @@ def predict_video(
                             'Ответ СРАЗУ начинай с номеров подходящих категорий через запятую, номера разделяй пробелом.\n'
                             f'{few_shot_prompt}\n'
                             f'{make_few_shot(vf)}\n'
-                            'Твой ответ:'
+                            'Выбранные номера категорий:'
                         ).strip()
 
                     choose_cats = list(range(len(categories)))
@@ -307,8 +307,10 @@ def main(args):
     try:
         if not args.predict_all:
             print("===" * 4)
-            print("prediction example")
+            print("prediction example (only 5 videos), pass PREDICT_ALL=True is want all")
             print("===" * 2)
+            
+            data = data.head()
         for _, row in tqdm(data.iterrows(), total=data.shape[0]):
             prediction = predict_video(
                 lm,
