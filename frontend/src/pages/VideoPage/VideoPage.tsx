@@ -38,7 +38,7 @@ const VideoPage: React.FC = () => {
           className="w-full h-96"
           src={`http://api.localhost/${data?.video_path}`}
           frameBorder="0"
-          allow="clipboard-write; autoplay"
+          allow="clipboard-write"
         // webkitAllowFullScreen
         // mozallowfullscreen
         // allowFullScreen
