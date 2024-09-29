@@ -14,6 +14,7 @@ PIPELINE_NAME="llm_hierarcial"
 # VIDEOS_DIR=${VIDEOS_DIR:-$DATA_DIR/train_dataset_tag_video/videos}
 # VIDEOS_PREP_DIR=${VIDEOS_PREP_DIR:-$DATA_DIR/data_prep/train_dataset_tag_video/videos}
 DATA_PREP=true \
+USE_S2T=true \
 EVAL=false \
 DEBUG=false \
 PREDICT_ALL=true \

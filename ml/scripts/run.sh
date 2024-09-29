@@ -13,6 +13,8 @@ DATA_PREP=${DATA_PREP:-false}
 EVAL=${EVAL:-true}
 DEBUG=${DEBUG:-false}
 PREDICT_ALL=${PREDICT_ALL:-false}
+USE_S2T=${USE_S2T:-false}
+
 
 # need big gpu
 # MODEL_TYPE="hf"
@@ -21,6 +23,8 @@ HF_MODEL_NAME=unsloth/Llama-3.2-1B-Instruct
 # easy testing
 MODEL_TYPE="openrouter" # vllm variant too
 OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-none}  # vllm variant too
+OPENAPI_API_KEY=$OPENROUTER_API_KEY
+
 OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1/}  # vllm variant too
 OPENROUTER_MODEL_NAME=${OPENROUTER_MODEL_NAME:-meta-llama/llama-3.1-70b-instruct}
 
@@ -60,14 +64,14 @@ python3 $ROOT_DIR/scripts/split.py \
 
 if [ "${DATA_PREP}" == "true" ]; then
     # could be long
-    # echo "data prep s2t"
-    # if [ ! -d "$VIDEOS_PREP_DIR/s2t/" ]; then
-        # mkdir -p $VIDEOS_PREP_DIR/s2t/
-        # python3 $ROOT_DIR/scripts/extract_text_from_video.py \
-        #     --input_path $VIDEOS_DIR \
-        #     --texts_output_path $VIDEOS_PREP_DIR/s2t/ \
-        #     --max_minutes 5
-    # fi
+    echo "data prep s2t"
+    if [ ! -d "$VIDEOS_PREP_DIR/s2t/" ]; then
+        mkdir -p $VIDEOS_PREP_DIR/s2t/
+        python3 $ROOT_DIR/scripts/extract_text_from_video.py \
+            --input_path $VIDEOS_DIR \
+            --texts_output_path $VIDEOS_PREP_DIR/s2t/ \
+            --max_minutes 5
+    fi
 
     echo "data prep video_desc"
     if [ ! -d "$VIDEOS_PREP_DIR/video_desc/" ]; then
@@ -101,12 +105,11 @@ if [ "$PIPELINE_NAME" == "llm_hierarcial" ]; then
         --model-type $MODEL_TYPE \
         --train_video_desc_dir $VIDEOS_PREP_DIR/video_desc/ \
         --predict_video_desc_dir $VIDEOS_PREP_DIR/video_desc/ \
+        $([ "${USE_S2T}" == "true" ] && echo --predict_s2t_dir $VIDEOS_PREP_DIR/s2t/) \
         $([ "${DEBUG}" == "true" ] && echo --debug) \
         $([ "${PREDICT_ALL}" == "true" ] && echo --predict-all) \
     ;
     # todo:
-        # --train_s2t_dir \
-        # --predict_s2t_dir \
 fi
 
 

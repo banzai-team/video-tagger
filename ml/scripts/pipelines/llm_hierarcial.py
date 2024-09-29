@@ -100,7 +100,7 @@ def predict_video(
     debug=False,
     verbose=True,
     few_shot_index: Optional[VectorStoreIndex]=None,
-    max_few_shots=2,
+    max_few_shots=3,
     # todo: later
     similarity_top_k=7,
 ) -> VideoTagsPrediction:
@@ -189,7 +189,7 @@ def predict_video(
                 "\n--\n".join(few_shot_prompts) + 
                 "\n=====\n\n" +
                 "А теперь твоя очередь, ниже информация по целевому видео на категоризацию. " +
-                "Если ты видишь, что целевое видео очень похоже на примеры выше - присвой ему те же категории." 
+                ("Если ты видишь, что в большинстве примеров выбрана категория \"Массовая культура\" - выбери ее." if level == 0 else "")
             ) if len(few_shot_prompts) > 0 else ""
             
             max_retires = 1
@@ -241,7 +241,7 @@ def predict_video(
                 except ConstraintException:
                     retry = True
                     if top_few_shot_tag_idx is not None:
-                        pred_cats = (str(c) for c in top_few_shot_tag_idx)
+                        pred_cats = list(str(c) for c in top_few_shot_tag_idx)[:1]
                     
                 except Exception as e:
                     retry = False
@@ -343,7 +343,7 @@ def main(args):
             pass
 
         for _, row in tqdm(data.iterrows(), total=data.shape[0]):
-            max_retries = 3
+            max_retries = 1
             retry_cnt = 0
             prediction = None
             while prediction is None and retry_cnt < max_retries:

@@ -11,7 +11,7 @@ from llama_index.core.indices import VectorStoreIndex
 from llama_index.core.node_parser import TokenTextSplitter
 from llama_index.core.schema import MetadataMode
 
-from ml_lib.utils import json_dir_to_dict, truncate_string
+from ml_lib.utils import json_dir_to_dict, truncate_string, text_dir_to_dict
 
 
 
@@ -111,7 +111,9 @@ def build_few_shot_index(train_filepath_csv, video_desc_dir=None, s2t_dir=None, 
         video_desc_dict = json_dir_to_dict(video_desc_dir)
         print(f'reading video_desc = {len(video_desc_dict)=}')
     if s2t_dir:
-        s2t_dict = json_dir_to_dict(s2t_dir)
+        s2t_dict = text_dir_to_dict(s2t_dir)
+        s2t_dict = {k: truncate_string(v, 256) for k, v in s2t_dict.items()}
+        print(f'reading s2t_dict = {len(s2t_dict)=}')
 
     docs = create_docs(df, s2t_dict, video_desc_dict)
     load_embedder(model_name=model_name)
