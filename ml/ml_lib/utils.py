@@ -27,6 +27,15 @@ def json_dir_to_dict(directory):
                 result[id] = data['content']
     return result
 
+def text_dir_to_dict(directory):
+    result = {}
+    for filename in os.listdir(directory):
+        if filename.endswith(".txt"):
+            id = os.path.splitext(filename)[0]
+            with open(os.path.join(directory, filename), 'r') as f:
+                result[id] = f.read()
+    return result
+
 def load_data(
     file_path_train, file_path_iab, 
     cols=("video_id", "title", "description"),
@@ -39,7 +48,8 @@ def load_data(
     s2t_dict = None
     video_desc_dict = None
     if s2t_dir:
-        s2t_dict = json_dir_to_dict(s2t_dir)
+        s2t_dict = text_dir_to_dict(s2t_dir)
+        s2t_dict = {k: truncate_string(v, 256) for k, v in s2t_dict.items()}
         
     if video_desc_dir:
         video_desc_dict = json_dir_to_dict(video_desc_dir)
