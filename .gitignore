@@ -6,7 +6,9 @@ data/**/videos/
 data/**/.DS_Store
 data/**/*.ipynb
 data/submits/
+data/data_prep/video_desc/
 .idea
+data/data_prep/video_desc/
 downloads/
 # data/
 .idea

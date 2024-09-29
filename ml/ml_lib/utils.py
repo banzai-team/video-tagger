@@ -1,16 +1,55 @@
+import json
+import os
 import pandas as pd
 
+def truncate_string(s, max_length):
+    """
+    Обрезает строку до максимальной длины.
 
-def load_data(file_path_train, file_path_iab, cols=("video_id", "title", "description")):
+    Args:
+        s (str): Исходная строка.
+        max_length (int): Максимальная длина строки.
+
+    Returns:
+        str: Обрезанная строка.
+    """
+    if len(s) > max_length:
+        return s[:max_length]
+    return s
+
+def json_dir_to_dict(directory):
+    result = {}
+    for filename in os.listdir(directory):
+        if filename.endswith(".json"):
+            id = os.path.splitext(filename)[0]
+            with open(os.path.join(directory, filename), 'r') as f:
+                data = json.load(f)
+                result[id] = data['content']
+    return result
+
+def load_data(
+    file_path_train, file_path_iab, 
+    cols=("video_id", "title", "description"),
+    s2t_dir=None,
+    video_desc_dir=None,
+):
     data = pd.read_csv(file_path_train)[list(cols)]
     taxonomy = pd.read_csv(file_path_iab)
+    
+    s2t_dict = None
+    video_desc_dict = None
+    if s2t_dir:
+        s2t_dict = json_dir_to_dict(s2t_dir)
+        
+    if video_desc_dir:
+        video_desc_dict = json_dir_to_dict(video_desc_dir)
 
     print(f"Data columns: {data.columns.tolist()}")
     print(f"Data head: \n{data.head(5)}")
 
     print(f"Taxonomy head: \n{taxonomy.head(5)}")
     print(f"Taxonomy columns: {taxonomy.columns.tolist()}")
-    return data, taxonomy
+    return data, taxonomy, video_desc_dict, s2t_dict
 
 
 def create_nested_structure(df):
