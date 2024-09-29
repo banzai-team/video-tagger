@@ -21,6 +21,7 @@ from ml_lib.model_registry import load_model_hf, load_model_openrounter
 from ml_lib.utils import create_nested_structure, load_data
 from scripts.pipelines.llm_hierarcial import VideoFeatures, predict_video
 from ml_lib.video.video_helper import extract_audio_from_video
+from ml_lib.video.video_helper import process_video as analyze_frames
 
 
 celery = Celery(
@@ -84,9 +85,16 @@ def process_video(self, input, **kwargs):
         f"Processing video with params: {str(input)}, additional params: {str(kwargs)}"
     )
     if ENABLE_S2T:
-        task_chain = chain(extract_audio.s(input), s2t.s(), process_video_text.s())
+        task_chain = chain(
+            extract_audio.s(input),
+            s2t.s(),
+            text_from_frames.s(),
+            process_video_text.s(),
+        )
     else:
-        task_chain = chain(extract_audio.s(input), process_video_text.s())
+        task_chain = chain(
+            extract_audio.s(input), text_from_frames.s(), process_video_text.s()
+        )
     # task_chain = chain(extract_audio.s(input) | s2t.s() | process_video_text.s())
 
     # Запуск цепочки задач
@@ -123,23 +131,25 @@ def s2t(self, input, **kwargs):
     return {"video_id": video_id, "text": text}
 
 
-# TODO: ЛЕША ДОБАВЬ, ТУТ process_video
-# @celery.task(bind=True)
-# def process_video_text(self, input, **kwargs):
-#     video_id = input["video_id"]
-#     audio_path = input["audio_path"]
-#     s2tModel = WhisperTranscriber()
+@celery.task(bind=True)
+def text_from_frames(self, input, **kwargs):
+    video_id = input["video_id"]
+    video = get_video_by_id(video_id=video_id)
+    frames_text = analyze_frames(video.video_path)
 
-#     text = s2tModel.transcribe_audio(audio_path)
-#     update_video(video_id=video_id, status="TEXT_EXTRACTED", text=text)
+    update_video(video_id=video_id, status="TEXT_TRANSCRIBED", frames_text=frames_text)
 
-#     return {"video_id": video_id, "text": text}
+    return {
+        "video_id": video_id,
+    }
 
 
 @celery.task(bind=True)
 def process_video_text(self, input, **kwargs):
     video_id = input["video_id"]
-    text = input["text"] if "text" in input else ""
+    video = get_video_by_id(video_id=video_id)
+    text = video.text
+    frames_text = video.frames_text
     logger.info(f"Processing video with model for video with id: {video_id}")
 
     video = get_video_by_id(video_id=video_id)
