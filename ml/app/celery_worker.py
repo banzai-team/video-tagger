@@ -21,7 +21,7 @@ from ml_lib.model_registry import load_model_hf, load_model_openrounter
 from ml_lib.utils import create_nested_structure, load_data
 from scripts.pipelines.llm_hierarcial import VideoFeatures, predict_video
 from ml_lib.video.video_helper import extract_audio_from_video
-from ml_lib.video.video_helper import process_video as analyze_frames
+from ml_lib.video_llm.process_frames import process_video as analyze_frames
 
 
 celery = Celery(
@@ -57,7 +57,7 @@ Initializing model with
 """
 logger.info(print_model_info)
 
-data, taxonomy = load_data(
+data, taxonomy, pred_video_desc_dict, pred_s2t_dict = load_data(
     file_path_train=FILE_PATH_PREDICT, file_path_iab=FILE_PATH_IAB
 )
 nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
@@ -68,9 +68,6 @@ elif MODEL_NAME == "openrouter":
     lm = load_model_openrounter(OPENROUTER_MODEL_NAME)
 else:
     raise NotImplementedError(f"{MODEL_NAME}")
-data, taxonomy = load_data(
-    file_path_train=FILE_PATH_PREDICT, file_path_iab=FILE_PATH_IAB
-)
 nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
 
 logger.info("""Model initialized""")
@@ -120,7 +117,8 @@ def extract_audio(self, input, **kwargs):
 @celery.task(bind=True)
 def s2t(self, input, **kwargs):
     video_id = input["video_id"]
-    audio_path = input["audio_path"]
+    video = get_video_by_id(video_id=video_id)
+    audio_path = video.audio_path
     logger.debug(f"Executing s2tfor video: {video_id}")
 
     text = s2tModel.extract_features(audio_path)
@@ -128,7 +126,7 @@ def s2t(self, input, **kwargs):
 
     logger.debug(f"s2t completed for video: {video_id}")
 
-    return {"video_id": video_id, "text": text}
+    return {"video_id": video_id}
 
 
 @celery.task(bind=True)
@@ -137,7 +135,7 @@ def text_from_frames(self, input, **kwargs):
     video = get_video_by_id(video_id=video_id)
     frames_text = analyze_frames(video.video_path)
 
-    update_video(video_id=video_id, status="TEXT_TRANSCRIBED", frames_text=frames_text)
+    update_video(video_id=video_id, status="FRAMES_DESCRIBED", frames_text=frames_text)
 
     return {
         "video_id": video_id,
@@ -148,7 +146,6 @@ def text_from_frames(self, input, **kwargs):
 def process_video_text(self, input, **kwargs):
     video_id = input["video_id"]
     video = get_video_by_id(video_id=video_id)
-    text = video.text
     frames_text = video.frames_text
     logger.info(f"Processing video with model for video with id: {video_id}")
 
@@ -160,7 +157,8 @@ def process_video_text(self, input, **kwargs):
             video_id=video_id,
             title=video.title,
             description=video.description,
-            text=text,
+            video_desc=frames_text,
+            s2t=video.text,
         ),
     )
     logger.info(f"Processed video for video with id: {video_id}")
