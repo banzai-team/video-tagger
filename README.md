@@ -112,3 +112,17 @@ To set up and run the application, follow the instructions in [@README.ml-run.md
 - Flexible and adaptable to various video classification tasks
 
 For more information on the machine learning aspects and how to run the ML pipeline, please consult the referenced README files.
+
+
+## Additional Model Support
+
+### Ollama
+
+Our application now supports Ollama, an open-source project that allows running large language models locally. To use Ollama:
+
+1. Ensure you have Docker installed on your system.
+2. The `docker-compose.ollama.yaml` file includes an Ollama service configuration. To use it:
+   - Set `MODEL_NAME=openrouter` in the `ml-celery-worker` service environment variables.
+   - The `OPENROUTER_BASE_URL` is set to `http://ollama:11434`, which routes requests to the Ollama service.
+
+The Ollama service is configured as follows:
