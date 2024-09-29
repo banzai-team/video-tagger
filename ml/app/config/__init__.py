@@ -9,4 +9,5 @@ from .config import (
     HF_MODEL_NAME,
     FILE_PATH_PREDICT,
     OPENROUTER_MODEL_NAME,
+    ENABLE_S2T,
 )

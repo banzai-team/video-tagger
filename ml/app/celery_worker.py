@@ -8,6 +8,7 @@ from app.config import (
     FILE_PATH_IAB,
     CELERY_BROKER_URL,
     CELERY_RESULT_BACKEND,
+    ENABLE_S2T,
 )
 import time
 from kombu import Queue
@@ -82,11 +83,11 @@ def process_video(self, input, **kwargs):
     logger.debug(
         f"Processing video with params: {str(input)}, additional params: {str(kwargs)}"
     )
-    task_chain = chain(
-        extract_audio.s(input),
-        s2t.s(),
-        process_video_text.s(),
-    )
+    if ENABLE_S2T:
+        task_chain = chain(extract_audio.s(input), s2t.s(), process_video_text.s())
+    else:
+        task_chain = chain(extract_audio.s(input), process_video_text.s())
+    # task_chain = chain(extract_audio.s(input) | s2t.s() | process_video_text.s())
 
     # Запуск цепочки задач
     result = task_chain.apply_async()
@@ -99,10 +100,12 @@ def extract_audio(self, input, **kwargs):
     video_id = input["video_id"]
     video = get_video_by_id(video_id=video_id)
     audio_output_path = f"./downloads/{video_id}/audio.wav"
+    logger.debug(f"Extracting audio from video: {video_id}")
     extract_audio_from_video(video_path=video.video_path, output_path=audio_output_path)
     update_video(
         video_id=video_id, status="AUDIO_EXTRACTED", audio_path=audio_output_path
     )
+    logger.debug(f"Extracted audio from video {video_id} into {audio_output_path}")
     return {"video_id": video_id, "audio_path": audio_output_path}
 
 
@@ -110,9 +113,12 @@ def extract_audio(self, input, **kwargs):
 def s2t(self, input, **kwargs):
     video_id = input["video_id"]
     audio_path = input["audio_path"]
+    logger.debug(f"Executing s2tfor video: {video_id}")
 
     text = s2tModel.extract_features(audio_path)
     update_video(video_id=video_id, status="TEXT_EXTRACTED", text=text)
+
+    logger.debug(f"s2t completed for video: {video_id}")
 
     return {"video_id": video_id, "text": text}
 
@@ -133,18 +139,21 @@ def s2t(self, input, **kwargs):
 @celery.task(bind=True)
 def process_video_text(self, input, **kwargs):
     video_id = input["video_id"]
-    text = input["text"]
-    logger.info(f"Process video with model. Video id: {video_id}")
+    text = input["text"] if "text" in input else ""
+    logger.info(f"Processing video with model for video with id: {video_id}")
 
     video = get_video_by_id(video_id=video_id)
     prediction = predict_video(
         lm,
         nested_taxonomy,
         VideoFeatures(
-            video_id=video_id, title=video.title, description=video.description,
-            #   text=text
+            video_id=video_id,
+            title=video.title,
+            description=video.description,
+            text=text,
         ),
     )
+    logger.info(f"Processed video for video with id: {video_id}")
     logger.info(f"Predicted tags for video: {video_id} {str(prediction)}")
 
     update_video(
