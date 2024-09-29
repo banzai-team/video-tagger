@@ -58,7 +58,7 @@ Initializing model with
 """
 logger.info(print_model_info)
 
-data, taxonomy, pred_video_desc_dict, pred_s2t_dict = load_data(
+data, taxonomy, video_desc_dict, s2t_dict = load_data(
     file_path_train=FILE_PATH_PREDICT, file_path_iab=FILE_PATH_IAB
 )
 nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
@@ -69,6 +69,9 @@ elif MODEL_NAME == "openrouter":
     lm = load_model_openrounter(OPENROUTER_MODEL_NAME)
 else:
     raise NotImplementedError(f"{MODEL_NAME}")
+data, taxonomy, video_desc_dict, s2t_dict = load_data(
+    file_path_train=FILE_PATH_PREDICT, file_path_iab=FILE_PATH_IAB
+)
 nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
 
 logger.info("""Model initialized""")
