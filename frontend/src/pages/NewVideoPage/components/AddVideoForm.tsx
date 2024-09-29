@@ -56,10 +56,10 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
   });
 
   const titleError = formik.touched?.title && formik.errors?.title ? formik.errors.title : "";
-  const titleColor = titleError ? 'text-destructive' : 'text-gray-800'
+  const titleColor = titleError ? 'text-red-500' : 'text-gray-800'
 
   const descriptionError = formik.touched?.description && formik.errors?.description ? formik.errors.description : "";
-  const descriptionColor = descriptionError ? 'text-destructive' : 'text-gray-800'
+  const descriptionColor = descriptionError ? 'text-red-500' : 'text-gray-800'
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -79,12 +79,12 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
           </div>
           <div className="flex flex-col gap-3">
             <div>
-              <div className={`text-xs pb-1 ${titleColor}`}>Заголовок видео</div>
+              <div className={`text-xs pb-1 ${titleColor}`}>Заголовок видео{formik.values.files && "*"}</div>
               <Input placeholder="Введите данные видео" {...formik.getFieldProps('title')}
                 disabled={!!formik.values.link} />
             </div>
             <div>
-              <div className={`text-xs pb-1 ${descriptionColor}`}>Описание видео</div>
+              <div className={`text-xs pb-1 ${descriptionColor}`}>Описание видео{formik.values.files && "*"}</div>
               <Input placeholder="Введите данные видео" {...formik.getFieldProps('description')}
                 disabled={!!formik.values.link} />
             </div>
@@ -98,7 +98,7 @@ const AddVideoForm: React.FC<AddVacancyFormProps> = ({ onSubmit }) => {
                         style={{ backgroundImage: 'url(/round.svg)' }}
                         className="bg-center bg-no-repeat bg-cover relative p-4 flex h-14 w-32 flex-col items-center justify-center rounded-md bg-zinc-100 md:p-2 md:h-20"
                       >
-                        <Button className="absolute top-1 right-1" variant="ghost" size="lg"
+                        <Button className="absolute top-1 right-1" variant="ghost" size="xs"
                           onClick={() => formik.setFieldValue("files", null)}>
                           <X className=" h-5 w-5 cursor-pointer hover:opacity-50" />
                         </Button>

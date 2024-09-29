@@ -21,6 +21,7 @@ class Video(Base):
     video_path = Column(String, nullable=True)
     audio_path = Column(String, nullable=True)
     text = Column(String, nullable=True)
+    frames_text = Column(String, nullable=True)
     status = Column(String, default=Status.SUBMITTED)
     progress = Column(Float, default=0.0)
     url = Column(String, nullable=True)  # remote URL

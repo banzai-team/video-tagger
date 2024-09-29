@@ -12,13 +12,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const VideoPage: React.FC = () => {
   const { id = '' } = useParams();
-  const successStatuses = ['DOWNLOADED', 'AUDIO_EXTRACTED']
 
   const { data } = useQuery({
     queryKey: [useInferenceEndpointsServiceGetVideoByIdV1VideosIdGet],
     queryFn: () => InferenceEndpointsService.getVideoByIdV1VideosIdGet({ id }),
-    // refetchInterval: 3000,
-    refetchInterval: data => !successStatuses.includes(data?.state?.data?.status) ? 3000 : false,
+    refetchInterval: 3000,
   });
 
   const tags = data?.tags ? JSON.parse(data?.tags) : []
@@ -38,7 +36,7 @@ const VideoPage: React.FC = () => {
           className="w-full h-96"
           src={`http://api.localhost/${data?.video_path}`}
           frameBorder="0"
-          allow="clipboard-write; autoplay"
+          allow="clipboard-write"
         // webkitAllowFullScreen
         // mozallowfullscreen
         // allowFullScreen
@@ -52,13 +50,25 @@ const VideoPage: React.FC = () => {
               </div>
             </> : <>
               <div className="font-bold">Теги:</div>
-              {tags.map((tag, key) => (
+              {tags?.map((tag, key) => (
                 <Badge key={`video-tag-${key}`} variant="accent">{tag}</Badge>
               ))}
             </>
             }
           </div>
-          <div className="pt-5 flex gap-3 flex-wrap md:pt-10">
+          <div className="pt-5 md:pt-7 flex gap-3 flex-wrap max-h-max">
+            {!data?.status ? <>
+              <div className='flex gap-5 align-center justify-center w-full'>
+                <div className="font-bold">Статус:</div>
+                <Skeleton className="h-4 w-full self-center" />
+              </div>
+            </> : <>
+              <div className="font-bold">Статус:</div>
+              <Badge variant="default">{data?.status}</Badge>
+            </>
+            }
+          </div>
+          <div className="pt-5 flex gap-3 flex-wrap md:pt-7">
             {!data?.description
               ? <div className='flex flex-col gap-2 w-full'>
                 <div className='flex gap-5 align-center justify-center'>

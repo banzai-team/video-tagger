@@ -8,6 +8,8 @@ from app.config import (
     FILE_PATH_IAB,
     CELERY_BROKER_URL,
     CELERY_RESULT_BACKEND,
+    ENABLE_S2T,
+    ENABLE_FRAMES_DESCR,
 )
 import time
 from kombu import Queue
@@ -20,6 +22,7 @@ from ml_lib.model_registry import load_model_hf, load_model_openrounter
 from ml_lib.utils import create_nested_structure, load_data
 from scripts.pipelines.llm_hierarcial import VideoFeatures, predict_video
 from ml_lib.video.video_helper import extract_audio_from_video
+from ml_lib.video_llm.process_frames import process_video as analyze_frames
 
 
 celery = Celery(
@@ -55,7 +58,7 @@ Initializing model with
 """
 logger.info(print_model_info)
 
-data, taxonomy = load_data(
+data, taxonomy, video_desc_dict, s2t_dict = load_data(
     file_path_train=FILE_PATH_PREDICT, file_path_iab=FILE_PATH_IAB
 )
 nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
@@ -66,7 +69,7 @@ elif MODEL_NAME == "openrouter":
     lm = load_model_openrounter(OPENROUTER_MODEL_NAME)
 else:
     raise NotImplementedError(f"{MODEL_NAME}")
-data, taxonomy = load_data(
+data, taxonomy, video_desc_dict, s2t_dict = load_data(
     file_path_train=FILE_PATH_PREDICT, file_path_iab=FILE_PATH_IAB
 )
 nested_taxonomy = create_nested_structure(taxonomy)  # type: dict[str, dict[str, list]]
@@ -82,11 +85,31 @@ def process_video(self, input, **kwargs):
     logger.debug(
         f"Processing video with params: {str(input)}, additional params: {str(kwargs)}"
     )
-    task_chain = chain(
-        extract_audio.s(input),
-        s2t.s(),
-        process_video_text.s(),
-    )
+    if ENABLE_S2T:
+        if ENABLE_FRAMES_DESCR:
+            task_chain = chain(
+                extract_audio.s(input),
+                s2t.s(),
+                text_from_frames.s(),
+                process_video_text.s(),
+            )
+        else:
+            task_chain = chain(
+                extract_audio.s(input),
+                s2t.s(),
+                process_video_text.s(),
+            )
+    else:
+        if ENABLE_FRAMES_DESCR:
+            task_chain = chain(
+                extract_audio.s(input), text_from_frames.s(), process_video_text.s()
+            )
+        else:
+            task_chain = chain(
+                extract_audio.s(input),
+                process_video_text.s(),
+            )
+    # task_chain = chain(extract_audio.s(input) | s2t.s() | process_video_text.s())
 
     # Запуск цепочки задач
     result = task_chain.apply_async()
@@ -99,51 +122,63 @@ def extract_audio(self, input, **kwargs):
     video_id = input["video_id"]
     video = get_video_by_id(video_id=video_id)
     audio_output_path = f"./downloads/{video_id}/audio.wav"
+    logger.debug(f"Extracting audio from video: {video_id}")
     extract_audio_from_video(video_path=video.video_path, output_path=audio_output_path)
     update_video(
         video_id=video_id, status="AUDIO_EXTRACTED", audio_path=audio_output_path
     )
+    logger.debug(f"Extracted audio from video {video_id} into {audio_output_path}")
     return {"video_id": video_id, "audio_path": audio_output_path}
 
 
 @celery.task(bind=True)
 def s2t(self, input, **kwargs):
     video_id = input["video_id"]
-    audio_path = input["audio_path"]
+    video = get_video_by_id(video_id=video_id)
+    audio_path = video.audio_path
+    logger.debug(f"Executing s2tfor video: {video_id}")
 
     text = s2tModel.extract_features(audio_path)
     update_video(video_id=video_id, status="TEXT_EXTRACTED", text=text)
 
-    return {"video_id": video_id, "text": text}
+    logger.debug(f"s2t completed for video: {video_id}")
+
+    return {"video_id": video_id}
 
 
-# TODO: ЛЕША ДОБАВЬ, ТУТ process_video
-# @celery.task(bind=True)
-# def process_video_text(self, input, **kwargs):
-#     video_id = input["video_id"]
-#     audio_path = input["audio_path"]
-#     s2tModel = WhisperTranscriber()
+@celery.task(bind=True)
+def text_from_frames(self, input, **kwargs):
+    video_id = input["video_id"]
+    video = get_video_by_id(video_id=video_id)
+    frames_text = analyze_frames(video.video_path)
 
-#     text = s2tModel.transcribe_audio(audio_path)
-#     update_video(video_id=video_id, status="TEXT_EXTRACTED", text=text)
+    update_video(video_id=video_id, status="FRAMES_DESCRIBED", frames_text=frames_text)
 
-#     return {"video_id": video_id, "text": text}
+    return {
+        "video_id": video_id,
+    }
 
 
 @celery.task(bind=True)
 def process_video_text(self, input, **kwargs):
     video_id = input["video_id"]
-    text = input["text"]
-    logger.info(f"Process video with model. Video id: {video_id}")
+    video = get_video_by_id(video_id=video_id)
+    frames_text = video.frames_text
+    logger.info(f"Processing video with model for video with id: {video_id}")
 
     video = get_video_by_id(video_id=video_id)
     prediction = predict_video(
         lm,
         nested_taxonomy,
         VideoFeatures(
-            video_id=video_id, title=video.title, description=video.description, text=text
+            video_id=video_id,
+            title=video.title,
+            description=video.description,
+            video_desc=frames_text,
+            s2t=video.text,
         ),
     )
+    logger.info(f"Processed video for video with id: {video_id}")
     logger.info(f"Predicted tags for video: {video_id} {str(prediction)}")
 
     update_video(

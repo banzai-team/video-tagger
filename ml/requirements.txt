@@ -36,10 +36,10 @@ guidance
 bitsandbytes
 transformers
 accelerate
-# openai-whisper
+openai-whisper
 yt-dlp
 moviepy
-faster-whisper
+# faster-whisper
 pydub
 # for openrouter
 openai
