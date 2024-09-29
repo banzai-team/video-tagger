@@ -6,7 +6,7 @@ class WhisperTranscriber:
     def __init__(self, model_size="medium", device=None):
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = WhisperModel(model_size, device=device, compute_type="int8" if device == "cuda" else "float32", num_workers=4, cpu_threads=4)
+        self.model = WhisperModel(model_size, device=device, compute_type="int8" if device == "cuda" else "float32")
         self.device = device
 
     def transcribe_audio(self, audio_path):

@@ -141,7 +141,8 @@ def process_video_text(self, input, **kwargs):
         lm,
         nested_taxonomy,
         VideoFeatures(
-            video_id=video_id, title=video.title, description=video.description, text=text
+            video_id=video_id, title=video.title, description=video.description,
+            #   text=text
         ),
     )
     logger.info(f"Predicted tags for video: {video_id} {str(prediction)}")

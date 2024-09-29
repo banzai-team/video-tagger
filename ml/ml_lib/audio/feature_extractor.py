@@ -1,20 +1,20 @@
-# from .s2t import WhisperTranscriber
-from .s2t_fastwhisper import WhisperTranscriber
+from .s2t import WhisperTranscriber
+# from .s2t_fastwhisper import WhisperTranscriber
 
 
 class FeatureExtractor:
     def __init__(self):
         self.transcriber = WhisperTranscriber()
 
-    def extract_features(self, audio_path):
+    def extract_features(self, audio_path, min_duration=1):
         from pydub import AudioSegment
 
         # Load the audio file
         audio = AudioSegment.from_file(audio_path)
 
-        # Extract the first 3 minutes (180 seconds)
-        three_minutes = 3 * 60 * 1000  # 3 minutes in milliseconds
-        audio_excerpt = audio[:three_minutes]
+        # Extract the first n minutes
+        n_minutes = min_duration * 60 * 1000  # n minutes in milliseconds
+        audio_excerpt = audio[:n_minutes]
 
         import os
         import tempfile
