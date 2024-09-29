@@ -12,13 +12,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const VideoPage: React.FC = () => {
   const { id = '' } = useParams();
-  const successStatuses = ['DOWNLOADED', 'AUDIO_EXTRACTED']
 
   const { data } = useQuery({
     queryKey: [useInferenceEndpointsServiceGetVideoByIdV1VideosIdGet],
     queryFn: () => InferenceEndpointsService.getVideoByIdV1VideosIdGet({ id }),
-    // refetchInterval: 3000,
-    refetchInterval: data => !successStatuses.includes(data?.state?.data?.status) ? 3000 : false,
+    refetchInterval: 3000,
   });
 
   const tags = data?.tags ? JSON.parse(data?.tags) : []
