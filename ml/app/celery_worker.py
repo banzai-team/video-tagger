@@ -9,6 +9,7 @@ from app.config import (
     CELERY_BROKER_URL,
     CELERY_RESULT_BACKEND,
     ENABLE_S2T,
+    ENABLE_FRAMES_DESCR,
 )
 import time
 from kombu import Queue
@@ -82,16 +83,29 @@ def process_video(self, input, **kwargs):
         f"Processing video with params: {str(input)}, additional params: {str(kwargs)}"
     )
     if ENABLE_S2T:
-        task_chain = chain(
-            extract_audio.s(input),
-            s2t.s(),
-            text_from_frames.s(),
-            process_video_text.s(),
-        )
+        if ENABLE_FRAMES_DESCR:
+            task_chain = chain(
+                extract_audio.s(input),
+                s2t.s(),
+                text_from_frames.s(),
+                process_video_text.s(),
+            )
+        else:
+            task_chain = chain(
+                extract_audio.s(input),
+                s2t.s(),
+                process_video_text.s(),
+            )
     else:
-        task_chain = chain(
-            extract_audio.s(input), text_from_frames.s(), process_video_text.s()
-        )
+        if ENABLE_FRAMES_DESCR:
+            task_chain = chain(
+                extract_audio.s(input), text_from_frames.s(), process_video_text.s()
+            )
+        else:
+            task_chain = chain(
+                extract_audio.s(input),
+                process_video_text.s(),
+            )
     # task_chain = chain(extract_audio.s(input) | s2t.s() | process_video_text.s())
 
     # Запуск цепочки задач

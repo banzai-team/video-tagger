@@ -10,4 +10,5 @@ from .config import (
     FILE_PATH_PREDICT,
     OPENROUTER_MODEL_NAME,
     ENABLE_S2T,
+    ENABLE_FRAMES_DESCR,
 )

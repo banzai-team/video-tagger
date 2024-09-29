@@ -134,7 +134,6 @@ services:
       - FILE_PATH_PREDICT=data/train_dataset_tag_video/baseline/train_data_categories.csv
       - FILE_PATH_IAB=data/data_prep/filtered_taxonomy.csv
       - OPENROUTER_API_KEY=${OPENAPI_API_KEY}
-      - ENABLE_S2T=True
 
   api-celery_worker:
     restart: always
