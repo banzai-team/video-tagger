@@ -35,6 +35,7 @@ const VideoTable: React.FC<VideoTableProps> = ({ data }) => {
       <TableHeader>
         <TableHead>Название</TableHead>
         <TableHead>Ссылка</TableHead>
+        <TableHead>Статус</TableHead>
         <TableHead>Теги</TableHead>
       </TableHeader>
       <TableBody>
@@ -54,6 +55,11 @@ const VideoTable: React.FC<VideoTableProps> = ({ data }) => {
               >
                 {item?.url}
               </a>
+            </TableCell>
+            <TableCell className="w-max max-w-32">
+              <Badge className="text-xs whitespace-nowrap" variant='default'>
+                {item?.status}
+              </Badge>
             </TableCell>
             <TableCell className="flex gap-2">
               {croppedTags(JSON.parse(item?.tags))}
