@@ -8,7 +8,7 @@
 * [Зависимости](#Зависимости)
 * [Запуск скрипта](#Запуск-скрипта)
 * [Параметры скрипта](#Параметры-скрипта)
-
+* [Создание новой виртуальной среды Python](#Создание-новой-виртуальной-среды-Python)
 
 ## Описание скрипта
 -------------------
@@ -44,19 +44,67 @@ python3 -m venv ./venv
 ## Запуск скрипта
 -----------------
 
-Положите папку с видео по пути: `data/train_dataset_tag_video/videos`
+Вообще поддерживается работа с HF и OpenAI like API.
+Таким образом появляется возможность использовать множество возможных движков инференса. Мы выбрали vllm как представитель простого и быстрого бэкенда для LLM. Ниже небольшая инструкция по развертке на машине с GPU.
 
-Положите папку с текстовым описанием и тегами по пути: `data/train_dataset_tag_video/baseline/train_data_categories.csv`
 
-Настройке окружение через `python3 -m venv ./venv` (см. секцию ниже, если не знаете как)
+### Развертка моделей с помощью VLLM
 
-Чтобы запустить скрипт, выполните следующую команду:
+Для развертки моделей с помощью VLLM необходимо выполнить следующие шаги:
+
+#### 1. Создание виртуальной среды
+
+Создайте новую директорию для VLLM и перейдите в нее:
+```bash
+mkdir vllm
+cd vllm
+```
+Создайте виртуальную среду Python:
+```bash
+python3 -m venv./venv
+```
+Активируйте виртуальную среду:
+```bash
+source./venv/bin/activate
+```
+#### 2. Установка необходимых пакетов
+
+Установите необходимые пакеты:
+```bash
+pip install -U vllm matplotlib "huggingface_hub[cli]"
+```
+#### 3. Авторизация в Hugging Face
+
+Авторизируйтесь в Hugging Face:
+```bash
+huggingface-cli login
+```
+Введите Ваш токен.
+
+#### 4. Развертка модели
+
+Разверните модель с помощью VLLM. Примеры команд для развертки моделей:
+
+* Модель для быстрой проверки (лучше запускать в tmux):
+```bash
+./venv/bin/vllm serve --device cuda --cpu-offload-gb 4 --api-key token-abc123 --dtype half --max-model-len 8192 neuralmagic/Qwen2-0.5B-Instruct-quantized.w8a16
+```
+* Модель для быстрой проверки (лучше запускать в tmux):
+```bash
+./venv/bin/vllm serve --device cuda --cpu-offload-gb 4 --api-key token-abc123 --dtype half --trust-remote-code Qwen/Qwen-VL-Chat
+```
+Замените `token-abc123` на Ваш токен.
+
+### Подготовка данных и запуск скрипта
+
+1. **Разместите видеофайлы** в директории: `data/train_dataset_tag_video/videos` и `data/test_tag_video/videos`
+2. **Разместите файлы с текстовым описанием и тегами** в директории: `data/train_dataset_tag_video/baseline/train_data_categories.csv` и `data/test_tag_video/sample_submission.csv`
+3. **Настройте виртуальную среду через requirements.ml.txt** (если не знаете как, см. секцию ниже)
+4. **Запустите скрипт** с флагом предсказания (`PREDICT_ALL=true`):
 
 ```bash
-PREDICT_ALL=true bash scripts/run.sh
+OPENROUTER_API_KEY="<API_KEY>" OPENROUTER_BASE_URL="<OPEAN_AI_LIKE_URL>" PREDICT_ALL=true bash scripts/run_test.sh
 ```
-
-Эта команда запустит скрипт с флагом предсказания (`PREDICT_ALL=true`).
 
 ## Параметры скрипта
 --------------------

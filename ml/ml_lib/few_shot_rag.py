@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+
 from llama_index.core import Document
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import VectorStoreIndex
@@ -9,6 +10,8 @@ from llama_index.core.retrievers import BaseRetriever
 from llama_index.core.indices import VectorStoreIndex
 from llama_index.core.node_parser import TokenTextSplitter
 from llama_index.core.schema import MetadataMode
+
+from ml_lib.utils import json_dir_to_dict, truncate_string
 
 
 
@@ -43,20 +46,31 @@ def join_tag_with_subtags(tag_list):
     return ": ".join(tag_list)
 
 
-def create_docs(df):
+def create_docs(df, s2t_dict=None, video_desc_dict=None):
     documents = []
+    s2t_dict = s2t_dict or {}
+    video_desc_dict = video_desc_dict or {}
     for _, row in df.iterrows():
+        video_id = row.video_id
         metadata = {
-            "video_id": row.video_id,
+            "video_id": video_id,
             "Название видео": row.title,
             "tags": row.tags,
             "expand_tags": split_tags(row.tags.split(', '))
         }
+        excluded_embed_metadata_keys=["video_id", "tags",]
+        if video_id in s2t_dict:
+            metadata['Транскибация первых минут видео'] = truncate_string(s2t_dict[video_id], 256)
+            excluded_embed_metadata_keys.append('Транскибация первых минут видео')
+        
+        if video_id in video_desc_dict:
+            metadata['Описание видео по 10 кадрам'] = truncate_string(video_desc_dict[video_id], 256)
+            
         documents.append(
             Document(
                 text=row.description[:min(len(row.description), 512)], 
                 metadata=metadata, 
-                excluded_embed_metadata_keys=["video_id", "tags"],
+                excluded_embed_metadata_keys=excluded_embed_metadata_keys,
                 metadata_template="{key}:\n---\n{value}\n---\n",
                 text_template="{metadata_str}Описание видео:\n---\n{content}\n---\n"
             )
@@ -89,9 +103,17 @@ class FixedMetaTokenTextSplitter(TokenTextSplitter):
         return embed_metadata_str
 
 
-def build_few_shot_index(train_filepath_csv, model_name="intfloat/multilingual-e5-base") -> VectorStoreIndex:
+def build_few_shot_index(train_filepath_csv, video_desc_dir=None, s2t_dir=None, model_name="intfloat/multilingual-e5-base") -> VectorStoreIndex:
     df = read_data(train_filepath_csv)
-    docs = create_docs(df)
+    video_desc_dict = None
+    s2t_dict = None
+    if video_desc_dir:
+        video_desc_dict = json_dir_to_dict(video_desc_dir)
+        print(f'reading video_desc = {len(video_desc_dict)=}')
+    if s2t_dir:
+        s2t_dict = json_dir_to_dict(s2t_dir)
+
+    docs = create_docs(df, s2t_dict, video_desc_dict)
     load_embedder(model_name=model_name)
     index = VectorStoreIndex.from_documents(
         documents=docs, 
